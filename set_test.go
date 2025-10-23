@@ -2,6 +2,7 @@ package smallset
 
 import (
 	"fmt"
+	"iter"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -65,11 +66,11 @@ func TestAdd(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(res, test.expected) {
-				t.Errorf("Add results mismatch.\nExpected: %v\nActual:   %v", test.expected, res)
+				t.Errorf("Add results mismatch.\nExpected: %v\nActual: %v", test.expected, res)
 			}
 
 			if !reflect.DeepEqual(s.items, test.items) {
-				t.Errorf("Items mismatch.\nExpected: %v\nActual:   %v", test.items, s.items)
+				t.Errorf("Items mismatch.\nExpected: %v\nActual: %v", test.items, s.items)
 			}
 		})
 	}
@@ -111,11 +112,11 @@ func TestRemove(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(res, test.expected) {
-				t.Errorf("Remove results mismatch.\nExpected: %v\nActual:   %v", test.expected, res)
+				t.Errorf("Remove results mismatch.\nExpected: %v\nActual: %v", test.expected, res)
 			}
 
 			if !reflect.DeepEqual(s.items, test.items) {
-				t.Errorf("Items mismatch.\nExpected: %v\nActual:   %v", test.items, s.items)
+				t.Errorf("Items mismatch.\nExpected: %v\nActual: %v", test.items, s.items)
 			}
 		})
 	}
@@ -204,7 +205,7 @@ func TestMinK(t *testing.T) {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
 			result := test.set.MinK(test.k)
 			if !reflect.DeepEqual(result, test.expected) {
-				t.Errorf("MinK(%d) failed.\nExpected: %v\nActual:   %v", test.k, test.expected, result)
+				t.Errorf("MinK(%d) failed.\nExpected: %v\nActual: %v", test.k, test.expected, result)
 			}
 		})
 	}
@@ -227,7 +228,65 @@ func TestMaxK(t *testing.T) {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
 			result := test.set.MaxK(test.k)
 			if !reflect.DeepEqual(result, test.expected) {
-				t.Errorf("MaxK(%d) failed.\nExpected: %v\nActual:   %v", test.k, test.expected, result)
+				t.Errorf("MaxK(%d) failed.\nExpected: %v\nActual: %v", test.k, test.expected, result)
+			}
+		})
+	}
+}
+
+func collect[T any](seq iter.Seq2[int, T]) []T {
+	var out []T
+	for _, v := range seq {
+		out = append(out, v)
+	}
+	return out
+}
+
+func TestRangeAsc(t *testing.T) {
+	s := From(1, 3, 5, 7, 9)
+
+	cases := []struct {
+		min, max int
+		expected []int
+	}{
+		{min: -1, max: 10, expected: []int{1, 3, 5, 7, 9}},
+		{min: 3, max: 7, expected: []int{3, 5}},
+		{min: 5, max: 6, expected: []int{5}},
+		{min: 8, max: 8, expected: nil},
+		{min: 0, max: 2, expected: []int{1}},
+		{min: 10, max: 20, expected: nil},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			result := collect(s.RangeAsc(test.min, test.max))
+			if !reflect.DeepEqual(result, test.expected) {
+				t.Errorf("RangeAsc(%d, %d) failed.\nExpected: %v\nActual: %v", test.min, test.max, result, test.expected)
+			}
+		})
+	}
+}
+
+func TestRangeDesc(t *testing.T) {
+	s := From(1, 3, 5, 7, 9)
+
+	cases := []struct {
+		max, min int
+		expected []int
+	}{
+		{max: 10, min: -1, expected: []int{9, 7, 5, 3, 1}},
+		{max: 7, min: 3, expected: []int{7, 5}},
+		{max: 6, min: 4, expected: []int{5}},
+		{min: 8, max: 8, expected: nil},
+		{max: 2, min: 0, expected: []int{1}},
+		{max: 20, min: 10, expected: nil},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			result := collect(s.RangeDesc(test.max, test.min))
+			if !reflect.DeepEqual(result, test.expected) {
+				t.Errorf("RangeDesc(%d, %d) failed.\nExpected: %v\nActual: %v", test.max, test.min, test.expected, result)
 			}
 		})
 	}

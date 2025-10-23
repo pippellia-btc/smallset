@@ -3,6 +3,7 @@ package smallset
 import (
 	"cmp"
 	"fmt"
+	"iter"
 	"slices"
 )
 
@@ -20,7 +21,7 @@ type Set[T cmp.Ordered] struct {
 // It panics if the capacity is <= 0.
 func New[T cmp.Ordered](capacity int) *Set[T] {
 	if capacity <= 0 {
-		panic("miss.New: capacity must be > 0")
+		panic("smallset.New: capacity must be > 0")
 	}
 
 	return &Set[T]{
@@ -75,6 +76,20 @@ func (s *Set[T]) Contains(e T) bool {
 	return found
 }
 
+// At returns the element at index i or panics if out of range.
+func (s *Set[T]) At(i int) T {
+	if i < 0 || i >= len(s.items) {
+		panic("smallset: index out of range")
+	}
+	return s.items[i]
+}
+
+// Find returns the index of an element, or the position where target would appear
+// in the sort order. It also returns a bool saying whether the target is really found in the slice.
+func (s *Set[T]) Find(e T) (int, bool) {
+	return slices.BinarySearch(s.items, e)
+}
+
 // Add an element and returns whether is was added (true), or was already present (false).
 func (s *Set[T]) Add(e T) bool {
 	i, found := slices.BinarySearch(s.items, e)
@@ -101,7 +116,7 @@ func (s *Set[T]) Remove(e T) bool {
 // It panics if the set is empty.
 func (s *Set[T]) Min() T {
 	if s.IsEmpty() {
-		panic("miss.Min: set is empty")
+		panic("smallset.Min: set is empty")
 	}
 	return s.items[0]
 }
@@ -110,7 +125,7 @@ func (s *Set[T]) Min() T {
 // It panics if the set is empty.
 func (s *Set[T]) Max() T {
 	if s.IsEmpty() {
-		panic("miss.Max: set is empty")
+		panic("smallset.Max: set is empty")
 	}
 	return s.items[len(s.items)-1]
 }
@@ -119,7 +134,7 @@ func (s *Set[T]) Max() T {
 // It panics if k is negative. If k is bigger than the set size, it returns all the items.
 func (s *Set[T]) MinK(k int) []T {
 	if k < 0 {
-		panic(fmt.Sprintf("miss.MinK: k must be positive: %d", k))
+		panic(fmt.Sprintf("smallset.MinK: k must be positive: %d", k))
 	}
 	k = min(k, s.Size())
 	return slices.Clone(s.items[:k])
@@ -129,10 +144,68 @@ func (s *Set[T]) MinK(k int) []T {
 // It panics if k is negative. If k is bigger than the set size, it returns all the items.
 func (s *Set[T]) MaxK(k int) []T {
 	if k < 0 {
-		panic(fmt.Sprintf("miss.MaxK: k must be positive: %d", k))
+		panic(fmt.Sprintf("smallset.MaxK: k must be positive: %d", k))
 	}
 	k = min(k, s.Size())
 	return slices.Clone(s.items[len(s.items)-k:])
+}
+
+// Ascend returns an iterator over the set in ascending order.
+func (s *Set[T]) Ascend() iter.Seq2[int, T] {
+	return slices.All(s.items)
+}
+
+// Descend returns an iterator over the set in descending order.
+func (s *Set[T]) Descend() iter.Seq2[int, T] {
+	return slices.Backward(s.items)
+}
+
+// RangeAsc iterates from min (inclusive) to max (exclusive) in ascending order.
+// If min or max are not present in the set, iteration starts/ends at the position
+// where they would appear in the sorted slice. Panics if max < min.
+func (s *Set[T]) RangeAsc(min, max T) iter.Seq2[int, T] {
+	if cmp.Less(max, min) {
+		panic("smallset.RangeAsc: invalid range (max < min)")
+	}
+	start, _ := slices.BinarySearch(s.items, min)
+
+	return func(yield func(int, T) bool) {
+		for i := start; i < len(s.items); i++ {
+			v := s.items[i]
+			if !cmp.Less(v, max) {
+				return
+			}
+			if !yield(i, v) {
+				return
+			}
+		}
+	}
+}
+
+// RangeDesc iterates from max (inclusive) down to min (exclusive) in descending order.
+// If min or max are not present in the set, iteration starts/ends at the position
+// where they would appear in the sorted slice. Panics if max < min.
+func (s *Set[T]) RangeDesc(max, min T) iter.Seq2[int, T] {
+	if cmp.Less(max, min) {
+		panic("smallset.RangeDesc: invalid range (max < min)")
+	}
+
+	end, found := slices.BinarySearch(s.items, max)
+	if !found && end > 0 {
+		end--
+	}
+
+	return func(yield func(int, T) bool) {
+		for i := end; i >= 0; i-- {
+			v := s.items[i]
+			if !cmp.Less(min, v) {
+				return
+			}
+			if !yield(i, v) {
+				return
+			}
+		}
+	}
 }
 
 // IsEqual returns whether the two sets have the same elements.
