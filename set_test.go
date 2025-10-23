@@ -147,6 +147,92 @@ func TestIsEqual(t *testing.T) {
 	}
 }
 
+func TestMin(t *testing.T) {
+	cases := []struct {
+		set      *Set[int]
+		expected int
+	}{
+		{set: From(10, 5, 20, 15), expected: 5},
+		{set: From(1, 5, 20, 69), expected: 1},
+		{set: From(7, 8, 4, 12, 221), expected: 4},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			result := test.set.Min()
+			if result != test.expected {
+				t.Errorf("Min() failed.\nExpected: %d\nActual:   %d", test.expected, result)
+			}
+		})
+	}
+}
+
+func TestMax(t *testing.T) {
+	cases := []struct {
+		set      *Set[int]
+		expected int
+	}{
+		{set: From(10, 5, 20, 15), expected: 20},
+		{set: From(1, 5, 20, 69), expected: 69},
+		{set: From(7, 8, 4, 12, 221), expected: 221},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			result := test.set.Max()
+			if result != test.expected {
+				t.Errorf("Max() failed.\nExpected: %d\nActual:   %d", test.expected, result)
+			}
+		})
+	}
+}
+
+func TestMinK(t *testing.T) {
+	cases := []struct {
+		set      *Set[int]
+		k        int
+		expected []int
+	}{
+		{set: From(10, 5, 20, 15), k: 2, expected: []int{5, 10}},
+		{set: From(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
+		{set: From(1, 5, 20, 69), k: 0, expected: []int{}},
+		{set: New[int](10), k: 5, expected: []int{}},
+		{set: New[int](10), k: 0, expected: []int{}},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			result := test.set.MinK(test.k)
+			if !reflect.DeepEqual(result, test.expected) {
+				t.Errorf("MinK(%d) failed.\nExpected: %v\nActual:   %v", test.k, test.expected, result)
+			}
+		})
+	}
+}
+
+func TestMaxK(t *testing.T) {
+	cases := []struct {
+		set      *Set[int]
+		k        int
+		expected []int
+	}{
+		{set: From(10, 5, 20, 15), k: 2, expected: []int{15, 20}},
+		{set: From(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
+		{set: From(1, 5, 20, 69), k: 0, expected: []int{}},
+		{set: New[int](10), k: 5, expected: []int{}},
+		{set: New[int](10), k: 0, expected: []int{}},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			result := test.set.MaxK(test.k)
+			if !reflect.DeepEqual(result, test.expected) {
+				t.Errorf("MaxK(%d) failed.\nExpected: %v\nActual:   %v", test.k, test.expected, result)
+			}
+		})
+	}
+}
+
 // --- Binary Set Operation Tests ---
 
 func TestIntersect(t *testing.T) {

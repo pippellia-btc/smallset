@@ -2,12 +2,14 @@ package miss
 
 import (
 	"cmp"
+	"fmt"
 	"slices"
 )
 
 var defaultCapacity int = 10
 
-// Set is a slice-based sorted set for small collections (< 100) of ordered types.
+// Set is a slice-based set sorted in ascending order.
+// It's more performant that a map based approach for small collections (<= 100) of ordered types.
 // The capacity of the set can dynamically grow, but the performance would start to deteriorate.
 // Not safe for concurrent use.
 type Set[T cmp.Ordered] struct {
@@ -93,6 +95,44 @@ func (s *Set[T]) Remove(e T) bool {
 
 	s.items = slices.Delete(s.items, i, i+1)
 	return true
+}
+
+// Min returns the smallest element in the set.
+// It panics if the set is empty.
+func (s *Set[T]) Min() T {
+	if s.IsEmpty() {
+		panic("miss.Min: set is empty")
+	}
+	return s.items[0]
+}
+
+// Max returns the biggest element in the sets.
+// It panics if the set is empty.
+func (s *Set[T]) Max() T {
+	if s.IsEmpty() {
+		panic("miss.Max: set is empty")
+	}
+	return s.items[len(s.items)-1]
+}
+
+// MinK returns the k smallest elements in s, sorted in ascending order. O(k) complexity.
+// It panics if k is negative. If k is bigger than the set size, it returns all the items.
+func (s *Set[T]) MinK(k int) []T {
+	if k < 0 {
+		panic(fmt.Sprintf("miss.MinK: k must be positive: %d", k))
+	}
+	k = min(k, s.Size())
+	return slices.Clone(s.items[:k])
+}
+
+// MaxK returns the k biggest elements in s, sorted in ascending order. O(k) complexity.
+// It panics if k is negative. If k is bigger than the set size, it returns all the items.
+func (s *Set[T]) MaxK(k int) []T {
+	if k < 0 {
+		panic(fmt.Sprintf("miss.MaxK: k must be positive: %d", k))
+	}
+	k = min(k, s.Size())
+	return slices.Clone(s.items[len(s.items)-k:])
 }
 
 // IsEqual returns whether the two sets have the same elements.
@@ -253,6 +293,7 @@ func (s *Set[T]) Union(other *Set[T]) *Set[T] {
 // - d12: elements in s1 not in s2
 // - inter: elements in both sets
 // - d21: elements in s2 not in s1
+// O(N+M) complexity.
 func (s1 *Set[T]) Partition(s2 *Set[T]) (d12, inter, d21 *Set[T]) {
 	if s1.IsEmpty() {
 		return New[T](defaultCapacity), New[T](defaultCapacity), s2.Clone()
