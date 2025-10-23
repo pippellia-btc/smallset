@@ -2,6 +2,12 @@
 
 `smallset` is a generic sorted set implementation for Go, backed by a slice. It is designed to be highly memory-efficient and offers fast range access, making it an excellent choice for **small sets (under 1000 elements)**.
 
+## Installation
+
+```
+go get github.com/pippellia-btc/smallset
+```
+
 ## Features
 
   * **Go Generics:** Works with any `cmp.Ordered` type (e.g., `int`, `string`, `float64` ...).
@@ -37,12 +43,6 @@ We tested `smallset` against `github.com/deckarep/golang-set`, the most used [ma
 See the results [here](bench.md).
 
 **TLDR:** `smallset` offers comparable performance for insertions and deletions up to 1000 elements, while outperforming the map based sets by **10-30x** for heavy set-like operations like `Intersect`, `Difference`, `SymetricDifference`...
-
-## Installation
-
-```
-go get github.com/pippellia-btc/smallset
-```
 
 
 ## Usage Examples
