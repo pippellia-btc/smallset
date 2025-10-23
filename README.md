@@ -16,7 +16,7 @@
 
 ## Performance Trade-offs
 
-| Operation | `smallset` (sorted slice) | Map-Based Sets (`map[T]struct{}`) |
+| Operation | `smallset` | `map[T]struct{}` |
 | --------- | ------------------------- | ---------------------------------- |
 | **Lookup (`Contains`)** | $O(\log N)$ (Binary Search) | $O(1)$ average (Hash Lookup) |
 | **Range Access (MinK/MaxK)** | $O(1)$ | $O(N)$ (Requires map iteration or conversion) |
