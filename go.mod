@@ -1,4 +1,4 @@
-module github.com/pippellia-btc/miniset
+module github.com/pippellia-btc/miss
 
 go 1.23.1
 
