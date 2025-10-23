@@ -1,4 +1,4 @@
-module github.com/pippellia-btc/miss
+module github.com/pippellia-btc/smallset
 
 go 1.23.1
 

@@ -1,4 +1,4 @@
-package miss
+package smallset
 
 import (
 	"cmp"

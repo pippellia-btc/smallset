@@ -1,7 +1,7 @@
 # Benchmarks
 goos: linux
 goarch: amd64
-pkg: github.com/pippellia-btc/miniset
+pkg: github.com/pippellia-btc/smallset
 cpu: Intel(R) Core(TM) i5-4690K CPU @ 3.50GHz
 
 ## Add
