@@ -160,12 +160,12 @@ func (s *Set[T]) Descend() iter.Seq2[int, T] {
 	return slices.Backward(s.items)
 }
 
-// RangeAsc iterates from min (inclusive) to max (exclusive) in ascending order.
+// BetweenAsc iterates from min (inclusive) to max (exclusive) in ascending order.
 // If min or max are not present in the set, iteration starts/ends at the position
 // where they would appear in the sorted slice. Panics if max < min.
-func (s *Set[T]) RangeAsc(min, max T) iter.Seq2[int, T] {
+func (s *Set[T]) BetweenAsc(min, max T) iter.Seq2[int, T] {
 	if cmp.Less(max, min) {
-		panic("smallset.RangeAsc: invalid range (max < min)")
+		panic("smallset.BetweenAsc: invalid range (max < min)")
 	}
 	start, _ := slices.BinarySearch(s.items, min)
 
@@ -182,12 +182,12 @@ func (s *Set[T]) RangeAsc(min, max T) iter.Seq2[int, T] {
 	}
 }
 
-// RangeDesc iterates from max (inclusive) down to min (exclusive) in descending order.
+// BetweenDesc iterates from max (inclusive) down to min (exclusive) in descending order.
 // If min or max are not present in the set, iteration starts/ends at the position
 // where they would appear in the sorted slice. Panics if max < min.
-func (s *Set[T]) RangeDesc(max, min T) iter.Seq2[int, T] {
+func (s *Set[T]) BetweenDesc(max, min T) iter.Seq2[int, T] {
 	if cmp.Less(max, min) {
-		panic("smallset.RangeDesc: invalid range (max < min)")
+		panic("smallset.BetweenDesc: invalid range (max < min)")
 	}
 
 	end, found := slices.BinarySearch(s.items, max)

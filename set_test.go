@@ -242,7 +242,7 @@ func collect[T any](seq iter.Seq2[int, T]) []T {
 	return out
 }
 
-func TestRangeAsc(t *testing.T) {
+func TestBetweenAsc(t *testing.T) {
 	s := From(1, 3, 5, 7, 9)
 
 	cases := []struct {
@@ -259,15 +259,15 @@ func TestRangeAsc(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			result := collect(s.RangeAsc(test.min, test.max))
+			result := collect(s.BetweenAsc(test.min, test.max))
 			if !reflect.DeepEqual(result, test.expected) {
-				t.Errorf("RangeAsc(%d, %d) failed.\nExpected: %v\nActual: %v", test.min, test.max, result, test.expected)
+				t.Errorf("BetweenAsc(%d, %d) failed.\nExpected: %v\nActual: %v", test.min, test.max, result, test.expected)
 			}
 		})
 	}
 }
 
-func TestRangeDesc(t *testing.T) {
+func TestBetweenDesc(t *testing.T) {
 	s := From(1, 3, 5, 7, 9)
 
 	cases := []struct {
@@ -284,9 +284,9 @@ func TestRangeDesc(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			result := collect(s.RangeDesc(test.max, test.min))
+			result := collect(s.BetweenDesc(test.max, test.min))
 			if !reflect.DeepEqual(result, test.expected) {
-				t.Errorf("RangeDesc(%d, %d) failed.\nExpected: %v\nActual: %v", test.max, test.min, test.expected, result)
+				t.Errorf("BetweenDesc(%d, %d) failed.\nExpected: %v\nActual: %v", test.max, test.min, test.expected, result)
 			}
 		})
 	}
