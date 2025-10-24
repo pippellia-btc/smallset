@@ -9,75 +9,75 @@ import (
 
 var defaultCapacity int = 10
 
-// Set is a slice-based set sorted in ascending order.
-// It's more performant that a map based approach for small collections (<= 100) of ordered types.
+// Ordered is a slice-based set sorted in ascending order.
+// It's more performant that a map based approach for small collections (< 1000) of ordered types.
 // The capacity of the set can dynamically grow, but the performance would start to deteriorate.
 // Not safe for concurrent use.
-type Set[T cmp.Ordered] struct {
+type Ordered[T cmp.Ordered] struct {
 	items []T
 }
 
-// New returns an initialized set with the provided capacity.
+// NewOrdered returns an initialized set with the provided capacity.
 // It panics if the capacity is <= 0.
-func New[T cmp.Ordered](capacity int) *Set[T] {
+func NewOrdered[T cmp.Ordered](capacity int) *Ordered[T] {
 	if capacity <= 0 {
-		panic("smallset.New: capacity must be > 0")
+		panic("smallset.NewOrdered: capacity must be > 0")
 	}
 
-	return &Set[T]{
+	return &Ordered[T]{
 		items: make([]T, 0, capacity),
 	}
 }
 
-// From returns an initialized set that contains the provided elements.
+// NewOrderedFrom returns an initialized set that contains the provided elements.
 // The original slice will be modified. If this is not wanted, please pass a copy.
-func From[T cmp.Ordered](items ...T) *Set[T] {
+func NewOrderedFrom[T cmp.Ordered](items ...T) *Ordered[T] {
 	if len(items) == 0 {
-		return New[T](defaultCapacity)
+		return NewOrdered[T](defaultCapacity)
 	}
 
 	slices.Sort(items)
 	items = slices.Compact(items)
-	s := New[T](max(len(items), defaultCapacity))
+	s := NewOrdered[T](max(len(items), defaultCapacity))
 	s.items = items
 	return s
 }
 
 // Size returns the number of elements in the set.
-func (s *Set[T]) Size() int {
+func (s *Ordered[T]) Size() int {
 	return len(s.items)
 }
 
 // IsEmpty returns whether the set has no elements.
-func (s *Set[T]) IsEmpty() bool {
+func (s *Ordered[T]) IsEmpty() bool {
 	return len(s.items) == 0
 }
 
 // Clear removes all elements.
-func (s *Set[T]) Clear() {
+func (s *Ordered[T]) Clear() {
 	s.items = s.items[:0]
 }
 
 // Clone returns a clone of the set.
-func (s *Set[T]) Clone() *Set[T] {
-	return &Set[T]{
+func (s *Ordered[T]) Clone() *Ordered[T] {
+	return &Ordered[T]{
 		items: slices.Clone(s.items),
 	}
 }
 
 // Items returns a copy of the internal slice of the set.
-func (s *Set[T]) Items() []T {
+func (s *Ordered[T]) Items() []T {
 	return slices.Clone(s.items)
 }
 
 // Contains returns whether the element is in the set. Operation is O(log(N))
-func (s *Set[T]) Contains(e T) bool {
+func (s *Ordered[T]) Contains(e T) bool {
 	_, found := slices.BinarySearch(s.items, e)
 	return found
 }
 
 // At returns the element at index i or panics if out of range.
-func (s *Set[T]) At(i int) T {
+func (s *Ordered[T]) At(i int) T {
 	if i < 0 || i >= len(s.items) {
 		panic("smallset: index out of range")
 	}
@@ -86,12 +86,12 @@ func (s *Set[T]) At(i int) T {
 
 // Find returns the index of an element, or the position where target would appear
 // in the sort order. It also returns a bool saying whether the target is really found in the slice.
-func (s *Set[T]) Find(e T) (int, bool) {
+func (s *Ordered[T]) Find(e T) (int, bool) {
 	return slices.BinarySearch(s.items, e)
 }
 
 // Add an element and returns whether is was added (true), or was already present (false).
-func (s *Set[T]) Add(e T) bool {
+func (s *Ordered[T]) Add(e T) bool {
 	i, found := slices.BinarySearch(s.items, e)
 	if found {
 		return false
@@ -102,7 +102,7 @@ func (s *Set[T]) Add(e T) bool {
 }
 
 // Remove an element if present, and returns whether is was removed (true), or was never present (false).
-func (s *Set[T]) Remove(e T) bool {
+func (s *Ordered[T]) Remove(e T) bool {
 	i, found := slices.BinarySearch(s.items, e)
 	if !found {
 		return false
@@ -114,7 +114,7 @@ func (s *Set[T]) Remove(e T) bool {
 
 // Min returns the smallest element in the set.
 // It panics if the set is empty.
-func (s *Set[T]) Min() T {
+func (s *Ordered[T]) Min() T {
 	if s.IsEmpty() {
 		panic("smallset.Min: set is empty")
 	}
@@ -123,7 +123,7 @@ func (s *Set[T]) Min() T {
 
 // Max returns the biggest element in the sets.
 // It panics if the set is empty.
-func (s *Set[T]) Max() T {
+func (s *Ordered[T]) Max() T {
 	if s.IsEmpty() {
 		panic("smallset.Max: set is empty")
 	}
@@ -132,7 +132,7 @@ func (s *Set[T]) Max() T {
 
 // MinK returns the k smallest elements in s, sorted in ascending order. O(k) complexity.
 // It panics if k is negative. If k is bigger than the set size, it returns all the items.
-func (s *Set[T]) MinK(k int) []T {
+func (s *Ordered[T]) MinK(k int) []T {
 	if k < 0 {
 		panic(fmt.Sprintf("smallset.MinK: k must be positive: %d", k))
 	}
@@ -142,7 +142,7 @@ func (s *Set[T]) MinK(k int) []T {
 
 // MaxK returns the k biggest elements in s, sorted in ascending order. O(k) complexity.
 // It panics if k is negative. If k is bigger than the set size, it returns all the items.
-func (s *Set[T]) MaxK(k int) []T {
+func (s *Ordered[T]) MaxK(k int) []T {
 	if k < 0 {
 		panic(fmt.Sprintf("smallset.MaxK: k must be positive: %d", k))
 	}
@@ -151,19 +151,19 @@ func (s *Set[T]) MaxK(k int) []T {
 }
 
 // Ascend returns an iterator over the set in ascending order.
-func (s *Set[T]) Ascend() iter.Seq2[int, T] {
+func (s *Ordered[T]) Ascend() iter.Seq2[int, T] {
 	return slices.All(s.items)
 }
 
 // Descend returns an iterator over the set in descending order.
-func (s *Set[T]) Descend() iter.Seq2[int, T] {
+func (s *Ordered[T]) Descend() iter.Seq2[int, T] {
 	return slices.Backward(s.items)
 }
 
-// BetweenAsc iterates from min (inclusive) to max (exclusive) in ascending order.
+// BetweenAsc iterates NewOrderedFrom min (inclusive) to max (exclusive) in ascending order.
 // If min or max are not present in the set, iteration starts/ends at the position
 // where they would appear in the sorted slice. Panics if max < min.
-func (s *Set[T]) BetweenAsc(min, max T) iter.Seq2[int, T] {
+func (s *Ordered[T]) BetweenAsc(min, max T) iter.Seq2[int, T] {
 	if cmp.Less(max, min) {
 		panic("smallset.BetweenAsc: invalid range (max < min)")
 	}
@@ -182,10 +182,10 @@ func (s *Set[T]) BetweenAsc(min, max T) iter.Seq2[int, T] {
 	}
 }
 
-// BetweenDesc iterates from max (inclusive) down to min (exclusive) in descending order.
+// BetweenDesc iterates NewOrderedFrom max (inclusive) down to min (exclusive) in descending order.
 // If min or max are not present in the set, iteration starts/ends at the position
 // where they would appear in the sorted slice. Panics if max < min.
-func (s *Set[T]) BetweenDesc(max, min T) iter.Seq2[int, T] {
+func (s *Ordered[T]) BetweenDesc(max, min T) iter.Seq2[int, T] {
 	if cmp.Less(max, min) {
 		panic("smallset.BetweenDesc: invalid range (max < min)")
 	}
@@ -209,19 +209,19 @@ func (s *Set[T]) BetweenDesc(max, min T) iter.Seq2[int, T] {
 }
 
 // IsEqual returns whether the two sets have the same elements.
-func (s *Set[T]) IsEqual(other *Set[T]) bool {
+func (s *Ordered[T]) IsEqual(other *Ordered[T]) bool {
 	return slices.Equal(s.items, other.items)
 }
 
-// Intersect returns the intersection of two sets, returning a new set
+// Intersect returns the intersection of two sets, returning a NewOrdered set
 // containing only the common elements. O(N+M) complexity.
-func (s *Set[T]) Intersect(other *Set[T]) *Set[T] {
+func (s *Ordered[T]) Intersect(other *Ordered[T]) *Ordered[T] {
 	size := min(s.Size(), other.Size())
 	if size == 0 {
-		return New[T](defaultCapacity)
+		return NewOrdered[T](defaultCapacity)
 	}
 
-	inter := New[T](size)
+	inter := NewOrdered[T](size)
 
 	i := 0
 	j := 0
@@ -249,15 +249,15 @@ func (s *Set[T]) Intersect(other *Set[T]) *Set[T] {
 
 // Difference returns the difference between this set and other. The returned set will contain
 // all elements of this set that are not elements of other. O(N+M) complexity.
-func (s *Set[T]) Difference(other *Set[T]) *Set[T] {
+func (s *Ordered[T]) Difference(other *Ordered[T]) *Ordered[T] {
 	if s.IsEmpty() {
-		return New[T](defaultCapacity)
+		return NewOrdered[T](defaultCapacity)
 	}
 	if other.IsEmpty() {
 		return s.Clone()
 	}
 
-	diff := New[T](s.Size())
+	diff := NewOrdered[T](s.Size())
 
 	i := 0
 	j := 0
@@ -284,9 +284,9 @@ func (s *Set[T]) Difference(other *Set[T]) *Set[T] {
 	return diff
 }
 
-// SymmetricDifference returns a new set with all elements which are
+// SymmetricDifference returns a NewOrdered set with all elements which are
 // in either this set or the other set but not in both. O(N+M) complexity.
-func (s *Set[T]) SymmetricDifference(other *Set[T]) *Set[T] {
+func (s *Ordered[T]) SymmetricDifference(other *Ordered[T]) *Ordered[T] {
 	if s.IsEmpty() {
 		return other.Clone()
 	}
@@ -294,7 +294,7 @@ func (s *Set[T]) SymmetricDifference(other *Set[T]) *Set[T] {
 		return s.Clone()
 	}
 
-	sdiff := New[T](s.Size() + other.Size())
+	sdiff := NewOrdered[T](s.Size() + other.Size())
 
 	i := 0
 	j := 0
@@ -323,8 +323,8 @@ func (s *Set[T]) SymmetricDifference(other *Set[T]) *Set[T] {
 	return sdiff
 }
 
-// Union returns a new set with all elements in both sets. O(N+M) complexity.
-func (s *Set[T]) Union(other *Set[T]) *Set[T] {
+// Union returns a NewOrdered set with all elements in both sets. O(N+M) complexity.
+func (s *Ordered[T]) Union(other *Ordered[T]) *Ordered[T] {
 	if s.IsEmpty() {
 		return other.Clone()
 	}
@@ -332,7 +332,7 @@ func (s *Set[T]) Union(other *Set[T]) *Set[T] {
 		return s.Clone()
 	}
 
-	union := New[T](s.Size() + other.Size())
+	union := NewOrdered[T](s.Size() + other.Size())
 
 	i := 0
 	j := 0
@@ -362,22 +362,22 @@ func (s *Set[T]) Union(other *Set[T]) *Set[T] {
 	return union
 }
 
-// Partition returns three new sets:
+// Partition returns three NewOrdered sets:
 // - d12: elements in s1 not in s2
 // - inter: elements in both sets
 // - d21: elements in s2 not in s1
 // O(N+M) complexity.
-func (s1 *Set[T]) Partition(s2 *Set[T]) (d12, inter, d21 *Set[T]) {
+func (s1 *Ordered[T]) Partition(s2 *Ordered[T]) (d12, inter, d21 *Ordered[T]) {
 	if s1.IsEmpty() {
-		return New[T](defaultCapacity), New[T](defaultCapacity), s2.Clone()
+		return NewOrdered[T](defaultCapacity), NewOrdered[T](defaultCapacity), s2.Clone()
 	}
 	if s2.IsEmpty() {
-		return s1.Clone(), New[T](defaultCapacity), New[T](defaultCapacity)
+		return s1.Clone(), NewOrdered[T](defaultCapacity), NewOrdered[T](defaultCapacity)
 	}
 
-	d12 = New[T](s1.Size())
-	inter = New[T](min(s1.Size(), s2.Size()))
-	d21 = New[T](s2.Size())
+	d12 = NewOrdered[T](s1.Size())
+	inter = NewOrdered[T](min(s1.Size(), s2.Size()))
+	d21 = NewOrdered[T](s2.Size())
 
 	i := 0
 	j := 0

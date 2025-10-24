@@ -12,7 +12,7 @@ import (
 
 func TestContains(t *testing.T) {
 	initial := []int{5, 10, 15, 20}
-	s := From(initial...)
+	s := NewOrderedFrom(initial...)
 
 	cases := []struct {
 		element  int
@@ -59,7 +59,7 @@ func TestAdd(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := New[int](10)
+			s := NewOrdered[int](10)
 			res := make([]bool, len(test.toAdd))
 			for j, e := range test.toAdd {
 				res[j] = s.Add(e)
@@ -105,7 +105,7 @@ func TestRemove(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := From(test.initial...)
+			s := NewOrderedFrom(test.initial...)
 			res := make([]bool, len(test.toRemove))
 			for j, e := range test.toRemove {
 				res[j] = s.Remove(e)
@@ -123,20 +123,20 @@ func TestRemove(t *testing.T) {
 }
 
 func TestIsEqual(t *testing.T) {
-	s1 := From(1, 2, 3)
-	s2 := From(3, 2, 1)
-	s3 := From(1, 2, 3, 4)
-	s4 := New[int](10)
+	s1 := NewOrderedFrom(1, 2, 3)
+	s2 := NewOrderedFrom(3, 2, 1)
+	s3 := NewOrderedFrom(1, 2, 3, 4)
+	s4 := NewOrdered[int](10)
 
 	cases := []struct {
-		setA     *Set[int]
-		setB     *Set[int]
+		setA     *Ordered[int]
+		setB     *Ordered[int]
 		expected bool
 	}{
 		{setA: s1, setB: s2, expected: true},
 		{setA: s1, setB: s3, expected: false},
 		{setA: s1, setB: s4, expected: false},
-		{setA: s4, setB: New[int](30), expected: true},
+		{setA: s4, setB: NewOrdered[int](30), expected: true},
 	}
 
 	for i, test := range cases {
@@ -150,12 +150,12 @@ func TestIsEqual(t *testing.T) {
 
 func TestMin(t *testing.T) {
 	cases := []struct {
-		set      *Set[int]
+		set      *Ordered[int]
 		expected int
 	}{
-		{set: From(10, 5, 20, 15), expected: 5},
-		{set: From(1, 5, 20, 69), expected: 1},
-		{set: From(7, 8, 4, 12, 221), expected: 4},
+		{set: NewOrderedFrom(10, 5, 20, 15), expected: 5},
+		{set: NewOrderedFrom(1, 5, 20, 69), expected: 1},
+		{set: NewOrderedFrom(7, 8, 4, 12, 221), expected: 4},
 	}
 
 	for i, test := range cases {
@@ -170,12 +170,12 @@ func TestMin(t *testing.T) {
 
 func TestMax(t *testing.T) {
 	cases := []struct {
-		set      *Set[int]
+		set      *Ordered[int]
 		expected int
 	}{
-		{set: From(10, 5, 20, 15), expected: 20},
-		{set: From(1, 5, 20, 69), expected: 69},
-		{set: From(7, 8, 4, 12, 221), expected: 221},
+		{set: NewOrderedFrom(10, 5, 20, 15), expected: 20},
+		{set: NewOrderedFrom(1, 5, 20, 69), expected: 69},
+		{set: NewOrderedFrom(7, 8, 4, 12, 221), expected: 221},
 	}
 
 	for i, test := range cases {
@@ -190,15 +190,15 @@ func TestMax(t *testing.T) {
 
 func TestMinK(t *testing.T) {
 	cases := []struct {
-		set      *Set[int]
+		set      *Ordered[int]
 		k        int
 		expected []int
 	}{
-		{set: From(10, 5, 20, 15), k: 2, expected: []int{5, 10}},
-		{set: From(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
-		{set: From(1, 5, 20, 69), k: 0, expected: []int{}},
-		{set: New[int](10), k: 5, expected: []int{}},
-		{set: New[int](10), k: 0, expected: []int{}},
+		{set: NewOrderedFrom(10, 5, 20, 15), k: 2, expected: []int{5, 10}},
+		{set: NewOrderedFrom(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
+		{set: NewOrderedFrom(1, 5, 20, 69), k: 0, expected: []int{}},
+		{set: NewOrdered[int](10), k: 5, expected: []int{}},
+		{set: NewOrdered[int](10), k: 0, expected: []int{}},
 	}
 
 	for i, test := range cases {
@@ -213,15 +213,15 @@ func TestMinK(t *testing.T) {
 
 func TestMaxK(t *testing.T) {
 	cases := []struct {
-		set      *Set[int]
+		set      *Ordered[int]
 		k        int
 		expected []int
 	}{
-		{set: From(10, 5, 20, 15), k: 2, expected: []int{15, 20}},
-		{set: From(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
-		{set: From(1, 5, 20, 69), k: 0, expected: []int{}},
-		{set: New[int](10), k: 5, expected: []int{}},
-		{set: New[int](10), k: 0, expected: []int{}},
+		{set: NewOrderedFrom(10, 5, 20, 15), k: 2, expected: []int{15, 20}},
+		{set: NewOrderedFrom(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
+		{set: NewOrderedFrom(1, 5, 20, 69), k: 0, expected: []int{}},
+		{set: NewOrdered[int](10), k: 5, expected: []int{}},
+		{set: NewOrdered[int](10), k: 0, expected: []int{}},
 	}
 
 	for i, test := range cases {
@@ -243,7 +243,7 @@ func collect[T any](seq iter.Seq2[int, T]) []T {
 }
 
 func TestBetweenAsc(t *testing.T) {
-	s := From(1, 3, 5, 7, 9)
+	s := NewOrderedFrom(1, 3, 5, 7, 9)
 
 	cases := []struct {
 		min, max int
@@ -268,7 +268,7 @@ func TestBetweenAsc(t *testing.T) {
 }
 
 func TestBetweenDesc(t *testing.T) {
-	s := From(1, 3, 5, 7, 9)
+	s := NewOrderedFrom(1, 3, 5, 7, 9)
 
 	cases := []struct {
 		max, min int
@@ -308,8 +308,8 @@ func TestIntersect(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := From(test.s1...)
-			s2 := From(test.s2...)
+			s1 := NewOrderedFrom(test.s1...)
+			s2 := NewOrderedFrom(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -345,8 +345,8 @@ func TestDifference(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := From(test.s1...)
-			s2 := From(test.s2...)
+			s1 := NewOrderedFrom(test.s1...)
+			s2 := NewOrderedFrom(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -381,8 +381,8 @@ func TestUnion(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := From(test.s1...)
-			s2 := From(test.s2...)
+			s1 := NewOrderedFrom(test.s1...)
+			s2 := NewOrderedFrom(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -417,8 +417,8 @@ func TestSymmetricDifference(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := From(test.s1...)
-			s2 := From(test.s2...)
+			s1 := NewOrderedFrom(test.s1...)
+			s2 := NewOrderedFrom(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -471,8 +471,8 @@ func TestPartition(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := From(test.s1...)
-			s2 := From(test.s2...)
+			s1 := NewOrderedFrom(test.s1...)
+			s2 := NewOrderedFrom(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -528,7 +528,7 @@ func BenchmarkAdd(b *testing.B) {
 		b.Run(fmt.Sprintf("size=%d", bench.size), func(b *testing.B) {
 
 			b.Run("slice_set", func(b *testing.B) {
-				set := New[int](bench.size)
+				set := NewOrdered[int](bench.size)
 				b.ResetTimer()
 				for i := range b.N {
 					set.Add(bench.vals[i%bench.size])
@@ -551,7 +551,7 @@ func BenchmarkContains(b *testing.B) {
 		b.Run(fmt.Sprintf("size=%d", bench.size), func(b *testing.B) {
 
 			b.Run("slice_set", func(b *testing.B) {
-				set := New[int](bench.size)
+				set := NewOrdered[int](bench.size)
 				for _, v := range bench.vals {
 					set.Add(v)
 				}
@@ -582,7 +582,7 @@ func BenchmarkRemove(b *testing.B) {
 		b.Run(fmt.Sprintf("size=%d", bench.size), func(b *testing.B) {
 
 			b.Run("slice_set", func(b *testing.B) {
-				set := New[int](bench.size)
+				set := NewOrdered[int](bench.size)
 				for _, v := range bench.vals {
 					set.Add(v)
 				}
@@ -619,11 +619,11 @@ func BenchmarkIntersect(b *testing.B) {
 				vals2[i] += 100000 // Ensure half are different
 			}
 
-			set1 := From(vals1...)
-			set2 := From(vals2...)
+			set1 := NewOrderedFrom(vals1...)
+			set2 := NewOrderedFrom(vals2...)
 
-			map1 := mapset.NewThreadUnsafeSet[int](vals1...)
-			map2 := mapset.NewThreadUnsafeSet[int](vals2...)
+			map1 := mapset.NewThreadUnsafeSet(vals1...)
+			map2 := mapset.NewThreadUnsafeSet(vals2...)
 
 			b.Run("slice_set", func(b *testing.B) {
 				b.ReportAllocs()
@@ -651,8 +651,8 @@ func BenchmarkUnion(b *testing.B) {
 			vals1 := bench.vals[:bench.size/2]
 			vals2 := bench.vals[bench.size/2:]
 
-			set1 := From(vals1...)
-			set2 := From(vals2...)
+			set1 := NewOrderedFrom(vals1...)
+			set2 := NewOrderedFrom(vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
@@ -687,8 +687,8 @@ func BenchmarkDifference(b *testing.B) {
 				vals2[i] += 100000
 			}
 
-			set1 := From(vals1...)
-			set2 := From(vals2...)
+			set1 := NewOrderedFrom(vals1...)
+			set2 := NewOrderedFrom(vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
@@ -723,8 +723,8 @@ func BenchmarkSymmetricDifference(b *testing.B) {
 				vals2[i] += 100000
 			}
 
-			set1 := From(vals1...)
-			set2 := From(vals2...)
+			set1 := NewOrderedFrom(vals1...)
+			set2 := NewOrderedFrom(vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
