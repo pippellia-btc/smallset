@@ -1,10 +1,11 @@
 package smallset
 
 import (
+	"cmp"
 	"fmt"
 	"iter"
 	"math/rand"
-	"reflect"
+	"slices"
 	"testing"
 
 	mapset "github.com/deckarep/golang-set/v2"
@@ -12,7 +13,7 @@ import (
 
 func TestContains(t *testing.T) {
 	initial := []int{5, 10, 15, 20}
-	s := NewOrderedFrom(initial...)
+	s := NewFrom(initial...)
 
 	cases := []struct {
 		element  int
@@ -59,17 +60,17 @@ func TestAdd(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := NewOrdered[int](10)
+			s := New[int](10)
 			res := make([]bool, len(test.toAdd))
 			for j, e := range test.toAdd {
 				res[j] = s.Add(e)
 			}
 
-			if !reflect.DeepEqual(res, test.expected) {
+			if !slices.Equal(res, test.expected) {
 				t.Errorf("Add results mismatch.\nExpected: %v\nActual: %v", test.expected, res)
 			}
 
-			if !reflect.DeepEqual(s.items, test.items) {
+			if !slices.Equal(s.items, test.items) {
 				t.Errorf("Items mismatch.\nExpected: %v\nActual: %v", test.items, s.items)
 			}
 		})
@@ -105,17 +106,17 @@ func TestRemove(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := NewOrderedFrom(test.initial...)
+			s := NewFrom(test.initial...)
 			res := make([]bool, len(test.toRemove))
 			for j, e := range test.toRemove {
 				res[j] = s.Remove(e)
 			}
 
-			if !reflect.DeepEqual(res, test.expected) {
+			if !slices.Equal(res, test.expected) {
 				t.Errorf("Remove results mismatch.\nExpected: %v\nActual: %v", test.expected, res)
 			}
 
-			if !reflect.DeepEqual(s.items, test.items) {
+			if !slices.Equal(s.items, test.items) {
 				t.Errorf("Items mismatch.\nExpected: %v\nActual: %v", test.items, s.items)
 			}
 		})
@@ -123,10 +124,10 @@ func TestRemove(t *testing.T) {
 }
 
 func TestIsEqual(t *testing.T) {
-	s1 := NewOrderedFrom(1, 2, 3)
-	s2 := NewOrderedFrom(3, 2, 1)
-	s3 := NewOrderedFrom(1, 2, 3, 4)
-	s4 := NewOrdered[int](10)
+	s1 := NewFrom(1, 2, 3)
+	s2 := NewFrom(3, 2, 1)
+	s3 := NewFrom(1, 2, 3, 4)
+	s4 := New[int](10)
 
 	cases := []struct {
 		setA     *Ordered[int]
@@ -136,7 +137,7 @@ func TestIsEqual(t *testing.T) {
 		{setA: s1, setB: s2, expected: true},
 		{setA: s1, setB: s3, expected: false},
 		{setA: s1, setB: s4, expected: false},
-		{setA: s4, setB: NewOrdered[int](30), expected: true},
+		{setA: s4, setB: New[int](30), expected: true},
 	}
 
 	for i, test := range cases {
@@ -153,9 +154,9 @@ func TestMin(t *testing.T) {
 		set      *Ordered[int]
 		expected int
 	}{
-		{set: NewOrderedFrom(10, 5, 20, 15), expected: 5},
-		{set: NewOrderedFrom(1, 5, 20, 69), expected: 1},
-		{set: NewOrderedFrom(7, 8, 4, 12, 221), expected: 4},
+		{set: NewFrom(10, 5, 20, 15), expected: 5},
+		{set: NewFrom(1, 5, 20, 69), expected: 1},
+		{set: NewFrom(7, 8, 4, 12, 221), expected: 4},
 	}
 
 	for i, test := range cases {
@@ -173,9 +174,9 @@ func TestMax(t *testing.T) {
 		set      *Ordered[int]
 		expected int
 	}{
-		{set: NewOrderedFrom(10, 5, 20, 15), expected: 20},
-		{set: NewOrderedFrom(1, 5, 20, 69), expected: 69},
-		{set: NewOrderedFrom(7, 8, 4, 12, 221), expected: 221},
+		{set: NewFrom(10, 5, 20, 15), expected: 20},
+		{set: NewFrom(1, 5, 20, 69), expected: 69},
+		{set: NewFrom(7, 8, 4, 12, 221), expected: 221},
 	}
 
 	for i, test := range cases {
@@ -194,17 +195,17 @@ func TestMinK(t *testing.T) {
 		k        int
 		expected []int
 	}{
-		{set: NewOrderedFrom(10, 5, 20, 15), k: 2, expected: []int{5, 10}},
-		{set: NewOrderedFrom(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
-		{set: NewOrderedFrom(1, 5, 20, 69), k: 0, expected: []int{}},
-		{set: NewOrdered[int](10), k: 5, expected: []int{}},
-		{set: NewOrdered[int](10), k: 0, expected: []int{}},
+		{set: NewFrom(10, 5, 20, 15), k: 2, expected: []int{5, 10}},
+		{set: NewFrom(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
+		{set: NewFrom(1, 5, 20, 69), k: 0, expected: []int{}},
+		{set: New[int](10), k: 5, expected: []int{}},
+		{set: New[int](10), k: 0, expected: []int{}},
 	}
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
 			result := test.set.MinK(test.k)
-			if !reflect.DeepEqual(result, test.expected) {
+			if !slices.Equal(result, test.expected) {
 				t.Errorf("MinK(%d) failed.\nExpected: %v\nActual: %v", test.k, test.expected, result)
 			}
 		})
@@ -217,17 +218,17 @@ func TestMaxK(t *testing.T) {
 		k        int
 		expected []int
 	}{
-		{set: NewOrderedFrom(10, 5, 20, 15), k: 2, expected: []int{15, 20}},
-		{set: NewOrderedFrom(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
-		{set: NewOrderedFrom(1, 5, 20, 69), k: 0, expected: []int{}},
-		{set: NewOrdered[int](10), k: 5, expected: []int{}},
-		{set: NewOrdered[int](10), k: 0, expected: []int{}},
+		{set: NewFrom(10, 5, 20, 15), k: 2, expected: []int{15, 20}},
+		{set: NewFrom(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
+		{set: NewFrom(1, 5, 20, 69), k: 0, expected: []int{}},
+		{set: New[int](10), k: 5, expected: []int{}},
+		{set: New[int](10), k: 0, expected: []int{}},
 	}
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
 			result := test.set.MaxK(test.k)
-			if !reflect.DeepEqual(result, test.expected) {
+			if !slices.Equal(result, test.expected) {
 				t.Errorf("MaxK(%d) failed.\nExpected: %v\nActual: %v", test.k, test.expected, result)
 			}
 		})
@@ -243,7 +244,7 @@ func collect[T any](seq iter.Seq2[int, T]) []T {
 }
 
 func TestBetweenAsc(t *testing.T) {
-	s := NewOrderedFrom(1, 3, 5, 7, 9)
+	s := NewFrom(1, 3, 5, 7, 9)
 
 	cases := []struct {
 		min, max int
@@ -260,7 +261,7 @@ func TestBetweenAsc(t *testing.T) {
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
 			result := collect(s.BetweenAsc(test.min, test.max))
-			if !reflect.DeepEqual(result, test.expected) {
+			if !slices.Equal(result, test.expected) {
 				t.Errorf("BetweenAsc(%d, %d) failed.\nExpected: %v\nActual: %v", test.min, test.max, result, test.expected)
 			}
 		})
@@ -268,7 +269,7 @@ func TestBetweenAsc(t *testing.T) {
 }
 
 func TestBetweenDesc(t *testing.T) {
-	s := NewOrderedFrom(1, 3, 5, 7, 9)
+	s := NewFrom(1, 3, 5, 7, 9)
 
 	cases := []struct {
 		max, min int
@@ -285,7 +286,7 @@ func TestBetweenDesc(t *testing.T) {
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
 			result := collect(s.BetweenDesc(test.max, test.min))
-			if !reflect.DeepEqual(result, test.expected) {
+			if !slices.Equal(result, test.expected) {
 				t.Errorf("BetweenDesc(%d, %d) failed.\nExpected: %v\nActual: %v", test.max, test.min, test.expected, result)
 			}
 		})
@@ -308,21 +309,21 @@ func TestIntersect(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewOrderedFrom(test.s1...)
-			s2 := NewOrderedFrom(test.s2...)
+			s1 := NewFrom(test.s1...)
+			s2 := NewFrom(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
 
 			inter := s1.Intersect(s2)
-			if !reflect.DeepEqual(inter.items, test.expected) {
+			if !slices.Equal(inter.items, test.expected) {
 				t.Errorf("Expected %v, got %v", test.expected, inter.items)
 			}
 
-			if !reflect.DeepEqual(s1, o1) {
+			if !s1.IsEqual(o1) {
 				t.Errorf("s1 mutated. before %v, after %v", o1, s1)
 			}
-			if !reflect.DeepEqual(s2, o2) {
+			if !s2.IsEqual(o2) {
 				t.Errorf("s2 mutated. before %v, after %v", o2, s2)
 			}
 		})
@@ -345,21 +346,21 @@ func TestDifference(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewOrderedFrom(test.s1...)
-			s2 := NewOrderedFrom(test.s2...)
+			s1 := NewFrom(test.s1...)
+			s2 := NewFrom(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
 
 			diff := s1.Difference(s2)
-			if !reflect.DeepEqual(diff.items, test.expected) {
+			if !slices.Equal(diff.items, test.expected) {
 				t.Errorf("Expected %v, got %v", test.expected, diff.items)
 			}
 
-			if !reflect.DeepEqual(s1, o1) {
+			if !s1.IsEqual(o1) {
 				t.Errorf("s1 mutated. before %v, after %v", o1, s1)
 			}
-			if !reflect.DeepEqual(s2, o2) {
+			if !s2.IsEqual(o2) {
 				t.Errorf("s2 mutated. before %v, after %v", o2, s2)
 			}
 		})
@@ -381,21 +382,21 @@ func TestUnion(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewOrderedFrom(test.s1...)
-			s2 := NewOrderedFrom(test.s2...)
+			s1 := NewFrom(test.s1...)
+			s2 := NewFrom(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
 
 			union := s1.Union(s2)
-			if !reflect.DeepEqual(union.items, test.expected) {
+			if !slices.Equal(union.items, test.expected) {
 				t.Errorf("Expected %v, got %v", test.expected, union.items)
 			}
 
-			if !reflect.DeepEqual(s1, o1) {
+			if !s1.IsEqual(o1) {
 				t.Errorf("s1 mutated. before %v, after %v", o1, s1)
 			}
-			if !reflect.DeepEqual(s2, o2) {
+			if !s2.IsEqual(o2) {
 				t.Errorf("s2 mutated. before %v, after %v", o2, s2)
 			}
 		})
@@ -417,21 +418,21 @@ func TestSymmetricDifference(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewOrderedFrom(test.s1...)
-			s2 := NewOrderedFrom(test.s2...)
+			s1 := NewFrom(test.s1...)
+			s2 := NewFrom(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
 
 			sdiff := s1.SymmetricDifference(s2)
-			if !reflect.DeepEqual(sdiff.items, test.expected) {
+			if !slices.Equal(sdiff.items, test.expected) {
 				t.Errorf("Expected %v, got %v", test.expected, sdiff.items)
 			}
 
-			if !reflect.DeepEqual(s1, o1) {
+			if !s1.IsEqual(o1) {
 				t.Errorf("s1 mutated. before %v, after %v", o1, s1)
 			}
-			if !reflect.DeepEqual(s2, o2) {
+			if !s2.IsEqual(o2) {
 				t.Errorf("s2 mutated. before %v, after %v", o2, s2)
 			}
 		})
@@ -471,28 +472,28 @@ func TestPartition(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewOrderedFrom(test.s1...)
-			s2 := NewOrderedFrom(test.s2...)
+			s1 := NewFrom(test.s1...)
+			s2 := NewFrom(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
 
 			d12, inter, d21 := s1.Partition(s2)
 
-			if !reflect.DeepEqual(d12.items, test.expectedD12) {
+			if !slices.Equal(d12.items, test.expectedD12) {
 				t.Errorf("D12 Expected %v, got %v", test.expectedD12, d12.items)
 			}
-			if !reflect.DeepEqual(inter.items, test.expectedInter) {
+			if !slices.Equal(inter.items, test.expectedInter) {
 				t.Errorf("Inter Expected %v, got %v", test.expectedInter, inter.items)
 			}
-			if !reflect.DeepEqual(d21.items, test.expectedD21) {
+			if !slices.Equal(d21.items, test.expectedD21) {
 				t.Errorf("D21 Expected %v, got %v", test.expectedD21, d21.items)
 			}
 
-			if !reflect.DeepEqual(s1, o1) {
+			if !s1.IsEqual(o1) {
 				t.Errorf("s1 mutated. before %v, after %v", o1, s1)
 			}
-			if !reflect.DeepEqual(s2, o2) {
+			if !s2.IsEqual(o2) {
 				t.Errorf("s2 mutated. before %v, after %v", o2, s2)
 			}
 		})
@@ -528,7 +529,15 @@ func BenchmarkAdd(b *testing.B) {
 		b.Run(fmt.Sprintf("size=%d", bench.size), func(b *testing.B) {
 
 			b.Run("slice_set", func(b *testing.B) {
-				set := NewOrdered[int](bench.size)
+				set := New[int](bench.size)
+				b.ResetTimer()
+				for i := range b.N {
+					set.Add(bench.vals[i%bench.size])
+				}
+			})
+
+			b.Run("slice_set_custom", func(b *testing.B) {
+				set := NewCustom(cmp.Compare[int], bench.size)
 				b.ResetTimer()
 				for i := range b.N {
 					set.Add(bench.vals[i%bench.size])
@@ -551,7 +560,19 @@ func BenchmarkContains(b *testing.B) {
 		b.Run(fmt.Sprintf("size=%d", bench.size), func(b *testing.B) {
 
 			b.Run("slice_set", func(b *testing.B) {
-				set := NewOrdered[int](bench.size)
+				set := New[int](bench.size)
+				for _, v := range bench.vals {
+					set.Add(v)
+				}
+
+				b.ResetTimer()
+				for i := range b.N {
+					set.Contains(i)
+				}
+			})
+
+			b.Run("slice_set_custom", func(b *testing.B) {
+				set := NewCustom(cmp.Compare[int], bench.size)
 				for _, v := range bench.vals {
 					set.Add(v)
 				}
@@ -582,7 +603,19 @@ func BenchmarkRemove(b *testing.B) {
 		b.Run(fmt.Sprintf("size=%d", bench.size), func(b *testing.B) {
 
 			b.Run("slice_set", func(b *testing.B) {
-				set := NewOrdered[int](bench.size)
+				set := New[int](bench.size)
+				for _, v := range bench.vals {
+					set.Add(v)
+				}
+
+				b.ResetTimer()
+				for i := range b.N {
+					set.Remove(i)
+				}
+			})
+
+			b.Run("slice_set_custom", func(b *testing.B) {
+				set := NewCustom(cmp.Compare[int], bench.size)
 				for _, v := range bench.vals {
 					set.Add(v)
 				}
@@ -619,8 +652,11 @@ func BenchmarkIntersect(b *testing.B) {
 				vals2[i] += 100000 // Ensure half are different
 			}
 
-			set1 := NewOrderedFrom(vals1...)
-			set2 := NewOrderedFrom(vals2...)
+			set1 := NewFrom(vals1...)
+			set2 := NewFrom(vals2...)
+
+			custom1 := NewCustomFrom(cmp.Compare[int], vals1...)
+			custom2 := NewCustomFrom(cmp.Compare[int], vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
@@ -630,6 +666,14 @@ func BenchmarkIntersect(b *testing.B) {
 				b.ResetTimer()
 				for range b.N {
 					set1.Intersect(set2)
+				}
+			})
+
+			b.Run("slice_set_custom", func(b *testing.B) {
+				b.ReportAllocs()
+				b.ResetTimer()
+				for range b.N {
+					custom1.Intersect(custom2)
 				}
 			})
 
@@ -651,8 +695,11 @@ func BenchmarkUnion(b *testing.B) {
 			vals1 := bench.vals[:bench.size/2]
 			vals2 := bench.vals[bench.size/2:]
 
-			set1 := NewOrderedFrom(vals1...)
-			set2 := NewOrderedFrom(vals2...)
+			set1 := NewFrom(vals1...)
+			set2 := NewFrom(vals2...)
+
+			custom1 := NewCustomFrom(cmp.Compare[int], vals1...)
+			custom2 := NewCustomFrom(cmp.Compare[int], vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
@@ -662,6 +709,14 @@ func BenchmarkUnion(b *testing.B) {
 				b.ResetTimer()
 				for range b.N {
 					set1.Union(set2)
+				}
+			})
+
+			b.Run("slice_set_custom", func(b *testing.B) {
+				b.ReportAllocs()
+				b.ResetTimer()
+				for range b.N {
+					custom1.Union(custom2)
 				}
 			})
 
@@ -687,8 +742,11 @@ func BenchmarkDifference(b *testing.B) {
 				vals2[i] += 100000
 			}
 
-			set1 := NewOrderedFrom(vals1...)
-			set2 := NewOrderedFrom(vals2...)
+			set1 := NewFrom(vals1...)
+			set2 := NewFrom(vals2...)
+
+			custom1 := NewCustomFrom(cmp.Compare[int], vals1...)
+			custom2 := NewCustomFrom(cmp.Compare[int], vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
@@ -698,6 +756,14 @@ func BenchmarkDifference(b *testing.B) {
 				b.ResetTimer()
 				for range b.N {
 					set1.Difference(set2)
+				}
+			})
+
+			b.Run("slice_set_custom", func(b *testing.B) {
+				b.ReportAllocs()
+				b.ResetTimer()
+				for range b.N {
+					custom1.Difference(custom2)
 				}
 			})
 
@@ -723,8 +789,11 @@ func BenchmarkSymmetricDifference(b *testing.B) {
 				vals2[i] += 100000
 			}
 
-			set1 := NewOrderedFrom(vals1...)
-			set2 := NewOrderedFrom(vals2...)
+			set1 := NewFrom(vals1...)
+			set2 := NewFrom(vals2...)
+
+			custom1 := NewCustomFrom(cmp.Compare[int], vals1...)
+			custom2 := NewCustomFrom(cmp.Compare[int], vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
@@ -734,6 +803,14 @@ func BenchmarkSymmetricDifference(b *testing.B) {
 				b.ResetTimer()
 				for range b.N {
 					set1.SymmetricDifference(set2)
+				}
+			})
+
+			b.Run("slice_set_custom", func(b *testing.B) {
+				b.ReportAllocs()
+				b.ResetTimer()
+				for range b.N {
+					custom1.SymmetricDifference(custom2)
 				}
 			})
 

@@ -58,8 +58,8 @@ import (
 )
 
 func main() {
-	// 1. Create a NewOrdered set with initial capacity
-	set := smallset.NewOrdered[int](5)
+	// 1. Create a New set with initial capacity
+	set := smallset.New[int](5)
 
 	// 2. Add elements (returns true if added, false if duplicate)
 	set.Add(20) // true
@@ -85,7 +85,7 @@ import (
 )
 
 func main() {
-	set := smallset.NewOrderedFrom(50, 10, 30, 20, 40) // Internally sorted: [10, 20, 30, 40, 50]
+	set := smallset.NewFrom(50, 10, 30, 20, 40) // Internally sorted: [10, 20, 30, 40, 50]
 
 	// MinK (returns k smallest elements)
 	mins := set.MinK(2)
