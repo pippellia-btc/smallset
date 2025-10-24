@@ -118,7 +118,7 @@ package main
 import (
     "cmp"
     "fmt"
-    "[github.com/pippellia-btc/smallset](https://github.com/pippellia-btc/smallset)"
+    "github.com/pippellia-btc/smallset"
 )
 
 // A custom struct, which is not even comparable due to the slice field.
@@ -134,7 +134,7 @@ func CmpPerson(a, b Person) int {
 
 func main() {
     // 1. Create a new set, providing the comparison function.
-    set := smallset.NewCustom[Person](5, CmpPerson)
+    set := smallset.NewCustom[Person](CmpPerson, 5)
 
     // 2. Add elements (returns true if added, false if duplicate)
     set.Add(Person{ID: 10, Name: "Alice"})	// true
