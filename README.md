@@ -47,8 +47,7 @@ The most common advice is to use hash maps for their guaranteed $O(1)$ complexit
 
 ## Benchmarks
 
-We tested `smallset` against `github.com/deckarep/golang-set`, the most used [map-based set implementation](https://github.com/deckarep/golang-set/tree/main).  
-See the results [here](bench.md).
+We tested `smallset` against `github.com/deckarep/golang-set`, the most used [map-based set implementation](https://github.com/deckarep/golang-set/tree/main). See the results [here](bench.md).
 
 **TLDR:** `smallset.Ordered` offers comparable performance for insertions and deletions up to 1000 elements, while outperforming the map based sets by **10-30x** for heavy set-like operations like `Intersect`, `Difference`, `SymetricDifference`...
 
