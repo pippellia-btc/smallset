@@ -158,6 +158,116 @@ func TestCustomRemove(t *testing.T) {
 		})
 	}
 }
+func TestCustomRemoveBefore(t *testing.T) {
+	cases := []struct {
+		initial  []Person
+		max      Person
+		expected int
+		items    []Person
+	}{
+		{
+			initial:  people1,
+			max:      Person{ID: 3},
+			expected: 2,
+			items:    []Person{{ID: 3, Name: "Alice", Age: 25}, {ID: 4, Name: "Eve", Age: 40}},
+		},
+		{
+			initial:  people2,
+			max:      Person{ID: 20},
+			expected: 0,
+			items:    unique2,
+		},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			s := NewCustomFrom(PersonCmp, test.initial...)
+			res := s.RemoveBefore(test.max)
+
+			if res != test.expected {
+				t.Errorf("Remove results mismatch.\nExpected: %v\nActual: %v", test.expected, res)
+			}
+
+			if !slices.Equal(s.items, test.items) {
+				t.Errorf("Items mismatch.\nExpected: %v\nActual: %v", test.items, s.items)
+			}
+		})
+	}
+}
+
+func TestCustomRemoveFrom(t *testing.T) {
+	cases := []struct {
+		initial  []Person
+		min      Person
+		expected int
+		items    []Person
+	}{
+		{
+			initial:  people1,
+			min:      Person{ID: 3},
+			expected: 2,
+			items:    []Person{{ID: 1, Name: "Bob", Age: 50}, {ID: 2, Name: "Charlie", Age: 30}},
+		},
+		{
+			initial:  people2,
+			min:      Person{ID: 20},
+			expected: 4,
+			items:    []Person{},
+		},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			s := NewCustomFrom(PersonCmp, test.initial...)
+			res := s.RemoveFrom(test.min)
+
+			if res != test.expected {
+				t.Errorf("Remove results mismatch.\nExpected: %v\nActual: %v", test.expected, res)
+			}
+
+			if !slices.Equal(s.items, test.items) {
+				t.Errorf("Items mismatch.\nExpected: %v\nActual: %v", test.items, s.items)
+			}
+		})
+	}
+}
+
+func TestCustomRemoveBetween(t *testing.T) {
+	cases := []struct {
+		initial  []Person
+		min, max Person
+		expected int
+		items    []Person
+	}{
+		{
+			initial: people1,
+			min:     Person{ID: 2}, max: Person{ID: 4},
+			expected: 2,
+			items:    []Person{{ID: 1, Name: "Bob", Age: 50}, {ID: 4, Name: "Eve", Age: 40}},
+		},
+		{
+			initial: people2,
+			min:     Person{ID: 20}, max: Person{ID: 50},
+			expected: 3,
+			items:    []Person{{ID: 50, Name: "Alpha", Age: 5}},
+		},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			s := NewCustomFrom(PersonCmp, test.initial...)
+			res := s.RemoveBetween(test.min, test.max)
+
+			if res != test.expected {
+				t.Errorf("Remove results mismatch.\nExpected: %v\nActual: %v", test.expected, res)
+			}
+
+			if !slices.Equal(s.items, test.items) {
+				t.Errorf("Items mismatch.\nExpected: %v\nActual: %v", test.items, s.items)
+			}
+		})
+	}
+}
 
 func TestCustomIsEqual(t *testing.T) {
 	s1 := NewCustomFrom(cmp.Compare[int], 1, 2, 3)

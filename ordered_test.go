@@ -123,6 +123,135 @@ func TestRemove(t *testing.T) {
 	}
 }
 
+func TestRemoveBefore(t *testing.T) {
+	cases := []struct {
+		initial  []int
+		max      int
+		expected int
+		items    []int
+	}{
+		{
+			initial:  []int{10, 20, 30},
+			max:      20,
+			expected: 1,
+			items:    []int{20, 30},
+		},
+		{
+			initial:  []int{5, 7, 8, 10},
+			max:      4,
+			expected: 0,
+			items:    []int{5, 7, 8, 10},
+		},
+		{
+			initial:  []int{1, 2, 3},
+			max:      6,
+			expected: 3,
+			items:    []int{},
+		},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			s := NewFrom(test.initial...)
+			res := s.RemoveBefore(test.max)
+
+			if res != test.expected {
+				t.Errorf("Remove results mismatch.\nExpected: %v\nActual: %v", test.expected, res)
+			}
+
+			if !slices.Equal(s.items, test.items) {
+				t.Errorf("Items mismatch.\nExpected: %v\nActual: %v", test.items, s.items)
+			}
+		})
+	}
+}
+
+func TestRemoveFrom(t *testing.T) {
+	cases := []struct {
+		initial  []int
+		min      int
+		expected int
+		items    []int
+	}{
+		{
+			initial:  []int{10, 20, 30},
+			min:      20,
+			expected: 2,
+			items:    []int{10},
+		},
+		{
+			initial:  []int{5, 7, 8, 10},
+			min:      4,
+			expected: 4,
+			items:    []int{},
+		},
+		{
+			initial:  []int{1, 2, 3},
+			min:      6,
+			expected: 0,
+			items:    []int{1, 2, 3},
+		},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			s := NewFrom(test.initial...)
+			res := s.RemoveFrom(test.min)
+
+			if res != test.expected {
+				t.Errorf("Remove results mismatch.\nExpected: %v\nActual: %v", test.expected, res)
+			}
+
+			if !slices.Equal(s.items, test.items) {
+				t.Errorf("Items mismatch.\nExpected: %v\nActual: %v", test.items, s.items)
+			}
+		})
+	}
+}
+
+func TestRemoveBetween(t *testing.T) {
+	cases := []struct {
+		initial  []int
+		min, max int
+		expected int
+		items    []int
+	}{
+		{
+			initial: []int{10, 20, 30},
+			min:     10, max: 20,
+			expected: 1,
+			items:    []int{20, 30},
+		},
+		{
+			initial: []int{5, 7, 8, 10},
+			min:     0, max: 9,
+			expected: 3,
+			items:    []int{10},
+		},
+		{
+			initial: []int{1, 2, 3},
+			min:     6, max: 9,
+			expected: 0,
+			items:    []int{1, 2, 3},
+		},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			s := NewFrom(test.initial...)
+			res := s.RemoveBetween(test.min, test.max)
+
+			if res != test.expected {
+				t.Errorf("Remove results mismatch.\nExpected: %v\nActual: %v", test.expected, res)
+			}
+
+			if !slices.Equal(s.items, test.items) {
+				t.Errorf("Items mismatch.\nExpected: %v\nActual: %v", test.items, s.items)
+			}
+		})
+	}
+}
+
 func TestIsEqual(t *testing.T) {
 	s1 := NewFrom(1, 2, 3)
 	s2 := NewFrom(3, 2, 1)

@@ -80,7 +80,7 @@ func (s *Ordered[T]) Contains(e T) bool {
 // At returns the element at index i or panics if out of range.
 func (s *Ordered[T]) At(i int) T {
 	if i < 0 || i >= len(s.items) {
-		panic("smallset: index out of range")
+		panic("smallset.Ordered.At: index out of range")
 	}
 	return s.items[i]
 }
@@ -113,11 +113,50 @@ func (s *Ordered[T]) Remove(e T) bool {
 	return true
 }
 
+// RemoveBefore removes all elements e such that e < max. Returns num removed.
+func (s *Ordered[T]) RemoveBefore(max T) int {
+	end, _ := slices.BinarySearch(s.items, max)
+	if end == 0 {
+		return 0
+	}
+
+	s.items = slices.Delete(s.items, 0, end)
+	return end
+}
+
+// RemoveFrom removed all elements e such that e >= min. Returns num removed.
+func (s *Ordered[T]) RemoveFrom(min T) int {
+	start, _ := slices.BinarySearch(s.items, min)
+	if start == len(s.items) {
+		return 0
+	}
+
+	removed := len(s.items) - start
+	s.items = slices.Delete(s.items, start, len(s.items))
+	return removed
+}
+
+// RemoveBetween removes all elements e such that min <= e < max. Returns num removed.
+func (s *Ordered[T]) RemoveBetween(min, max T) int {
+	if cmp.Less(max, min) {
+		panic("smallset.Ordered.RemoveBetween: invalid range (max < min)")
+	}
+
+	start, _ := slices.BinarySearch(s.items, min)
+	end, _ := slices.BinarySearch(s.items, max)
+	if start == end {
+		return 0
+	}
+
+	s.items = slices.Delete(s.items, start, end)
+	return end - start
+}
+
 // Min returns the smallest element in the set.
 // It panics if the set is empty.
 func (s *Ordered[T]) Min() T {
 	if s.IsEmpty() {
-		panic("smallset.Min: set is empty")
+		panic("smallset.Ordered.Min: set is empty")
 	}
 	return s.items[0]
 }
@@ -126,7 +165,7 @@ func (s *Ordered[T]) Min() T {
 // It panics if the set is empty.
 func (s *Ordered[T]) Max() T {
 	if s.IsEmpty() {
-		panic("smallset.Max: set is empty")
+		panic("smallset.Ordered.Max: set is empty")
 	}
 	return s.items[len(s.items)-1]
 }
@@ -135,7 +174,7 @@ func (s *Ordered[T]) Max() T {
 // It panics if k is negative. If k is bigger than the set size, it returns all the items.
 func (s *Ordered[T]) MinK(k int) []T {
 	if k < 0 {
-		panic(fmt.Sprintf("smallset.MinK: k must be positive: %d", k))
+		panic(fmt.Sprintf("smallset.Ordered.MinK: k must be positive: %d", k))
 	}
 	k = min(k, s.Size())
 	return slices.Clone(s.items[:k])
@@ -145,7 +184,7 @@ func (s *Ordered[T]) MinK(k int) []T {
 // It panics if k is negative. If k is bigger than the set size, it returns all the items.
 func (s *Ordered[T]) MaxK(k int) []T {
 	if k < 0 {
-		panic(fmt.Sprintf("smallset.MaxK: k must be positive: %d", k))
+		panic(fmt.Sprintf("smallset.Ordered.MaxK: k must be positive: %d", k))
 	}
 	k = min(k, s.Size())
 	return slices.Clone(s.items[len(s.items)-k:])
@@ -166,7 +205,7 @@ func (s *Ordered[T]) Descend() iter.Seq2[int, T] {
 // where they would appear in the sorted slice. Panics if max < min.
 func (s *Ordered[T]) BetweenAsc(min, max T) iter.Seq2[int, T] {
 	if cmp.Less(max, min) {
-		panic("smallset.BetweenAsc: invalid range (max < min)")
+		panic("smallset.Ordered.BetweenAsc: invalid range (max < min)")
 	}
 	start, _ := slices.BinarySearch(s.items, min)
 
@@ -188,7 +227,7 @@ func (s *Ordered[T]) BetweenAsc(min, max T) iter.Seq2[int, T] {
 // where they would appear in the sorted slice. Panics if max < min.
 func (s *Ordered[T]) BetweenDesc(max, min T) iter.Seq2[int, T] {
 	if cmp.Less(max, min) {
-		panic("smallset.BetweenDesc: invalid range (max < min)")
+		panic("smallset.Ordered.BetweenDesc: invalid range (max < min)")
 	}
 
 	end, found := slices.BinarySearch(s.items, max)

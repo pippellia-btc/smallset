@@ -150,6 +150,45 @@ func (s *Custom[T]) Remove(e T) bool {
 	return true
 }
 
+// RemoveBefore removes all elements e such that e < max. Returns num removed.
+func (s *Custom[T]) RemoveBefore(max T) int {
+	end, _ := slices.BinarySearchFunc(s.items, max, s.cmp)
+	if end == 0 {
+		return 0
+	}
+
+	s.items = slices.Delete(s.items, 0, end)
+	return end
+}
+
+// RemoveFrom removed all elements e such that e >= min. Returns num removed.
+func (s *Custom[T]) RemoveFrom(min T) int {
+	start, _ := slices.BinarySearchFunc(s.items, min, s.cmp)
+	if start == len(s.items) {
+		return 0
+	}
+
+	removed := len(s.items) - start
+	s.items = slices.Delete(s.items, start, len(s.items))
+	return removed
+}
+
+// RemoveBetween removes all elements e such that min <= e < max. Returns num removed.
+func (s *Custom[T]) RemoveBetween(min, max T) int {
+	if s.cmp.less(max, min) {
+		panic("smallset.Custom.RemoveBetween: invalid range (max < min)")
+	}
+
+	start, _ := slices.BinarySearchFunc(s.items, min, s.cmp)
+	end, _ := slices.BinarySearchFunc(s.items, max, s.cmp)
+	if start == end {
+		return 0
+	}
+
+	s.items = slices.Delete(s.items, start, end)
+	return end - start
+}
+
 // Min returns the smallest element in the set.
 // It panics if the set is empty.
 func (s *Custom[T]) Min() T {
