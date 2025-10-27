@@ -268,12 +268,12 @@ func (s *Ordered[T]) Intersect(other *Ordered[T]) *Ordered[T] {
 
 	for i < s.Size() && j < other.Size() {
 		s_i := s.items[i]
-		o_i := other.items[j]
+		o_j := other.items[j]
 
-		if s_i < o_i {
+		if s_i < o_j {
 			// element in s not in other
 			i++
-		} else if o_i < s_i {
+		} else if o_j < s_i {
 			// element in other not in s
 			j++
 		} else {
@@ -304,13 +304,13 @@ func (s *Ordered[T]) Difference(other *Ordered[T]) *Ordered[T] {
 
 	for i < s.Size() && j < other.Size() {
 		s_i := s.items[i]
-		o_i := other.items[j]
+		o_j := other.items[j]
 
-		if s_i < o_i {
+		if s_i < o_j {
 			// element in s not in other
 			diff.items = append(diff.items, s_i)
 			i++
-		} else if o_i < s_i {
+		} else if o_j < s_i {
 			// element in other not in s
 			j++
 		} else {
@@ -341,15 +341,15 @@ func (s *Ordered[T]) SymmetricDifference(other *Ordered[T]) *Ordered[T] {
 
 	for i < s.Size() && j < other.Size() {
 		s_i := s.items[i]
-		o_i := other.items[j]
+		o_j := other.items[j]
 
-		if s_i < o_i {
+		if s_i < o_j {
 			// element in s not in other
 			sdiff.items = append(sdiff.items, s_i)
 			i++
-		} else if o_i < s_i {
+		} else if o_j < s_i {
 			// element in other not in s
-			sdiff.items = append(sdiff.items, o_i)
+			sdiff.items = append(sdiff.items, o_j)
 			j++
 		} else {
 			// element in both
@@ -379,15 +379,15 @@ func (s *Ordered[T]) Union(other *Ordered[T]) *Ordered[T] {
 
 	for i < s.Size() && j < other.Size() {
 		s_i := s.items[i]
-		o_i := other.items[j]
+		o_j := other.items[j]
 
-		if s_i < o_i {
+		if s_i < o_j {
 			// element in s not in other
 			union.items = append(union.items, s_i)
 			i++
-		} else if o_i < s_i {
+		} else if o_j < s_i {
 			// element in other not in s
-			union.items = append(union.items, o_i)
+			union.items = append(union.items, o_j)
 			j++
 		} else {
 			// element in both
@@ -445,4 +445,89 @@ func (s1 *Ordered[T]) Partition(s2 *Ordered[T]) (d12, inter, d21 *Ordered[T]) {
 	d12.items = append(d12.items, s1.items[i:]...)
 	d21.items = append(d21.items, s2.items[j:]...)
 	return d12, inter, d21
+}
+
+// Merge efficiently combines multiple [Ordered] sets into a single new set.
+// This is significantly more efficient than chaining s1.Union(s2).Union(s3)...
+// as it performs only a single sort and compact operation on the combined data.
+func Merge[T cmp.Ordered](sets ...*Ordered[T]) *Ordered[T] {
+	if len(sets) == 0 {
+		return New[T](defaultCapacity)
+	}
+	if len(sets) == 1 {
+		return sets[0].Clone()
+	}
+
+	size := 0
+	for _, s := range sets {
+		size += s.Size()
+	}
+
+	if size == 0 {
+		return New[T](defaultCapacity)
+	}
+
+	combined := make([]T, 0, size)
+	for _, s := range sets {
+		combined = append(combined, s.items...)
+	}
+
+	slices.Sort(combined)
+	combined = slices.Compact(combined)
+	return &Ordered[T]{items: combined}
+}
+
+// Intersect efficiently finds the common elements present in *all* provided [Ordered] sets.
+// It works by iteratively intersecting sets from the smallest to the biggest.
+// It sorts the sets slice in place.
+func Intersect[T cmp.Ordered](sets ...*Ordered[T]) *Ordered[T] {
+	if len(sets) == 0 {
+		return New[T](defaultCapacity)
+	}
+	if len(sets) == 1 {
+		return sets[0].Clone()
+	}
+
+	// sort the sets from smallest to biggest
+	slices.SortFunc(sets, func(s1, s2 *Ordered[T]) int {
+		return cmp.Compare(s1.Size(), s2.Size())
+	})
+
+	inter := sets[0].Clone()
+	if inter.IsEmpty() {
+		return inter
+	}
+
+	for _, set := range sets[1:] {
+		// w: write-index. Tracks the position to place the next "kept" item.
+		// r: read-index. Iterates through our 'candidates' slice.
+		// j: set-index. Iterates through the 'setItems' slice.
+		w, r, j := 0, 0, 0
+
+		for r < inter.Size() && j < set.Size() {
+			candidate := inter.items[r]
+			item := set.items[j]
+
+			if candidate < item {
+				// element in inter not in set.
+				// Discard it by not increasing the write index
+				r++
+			} else if item < candidate {
+				// element in set not in inter
+				j++
+			} else {
+				// element in both, keep it
+				inter.items[w] = candidate
+				w++
+				r++
+				j++
+			}
+		}
+
+		inter.items = inter.items[:w]
+		if inter.IsEmpty() {
+			return inter
+		}
+	}
+	return inter
 }

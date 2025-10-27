@@ -637,3 +637,57 @@ func TestCustomPartition(t *testing.T) {
 		})
 	}
 }
+
+func TestCustomMerge(t *testing.T) {
+	cases := []struct {
+		sets     [][]int
+		expected []int
+	}{
+		{sets: [][]int{{1, 2, 3}, {}, nil, {5, 4, 2}}, expected: []int{1, 2, 3, 4, 5}},
+		{sets: nil, expected: []int{}},
+		{sets: [][]int{}, expected: []int{}},
+		{sets: [][]int{{1, 2, 3}, {4, 5, 6}, {-1, 100}}, expected: []int{-1, 1, 2, 3, 4, 5, 6, 100}},
+		{sets: [][]int{{1, 2, 3}, {1, 2, 3}}, expected: []int{1, 2, 3}},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			sets := make([]*Custom[int], len(test.sets))
+			for i := range test.sets {
+				sets[i] = NewCustomFrom(cmp.Compare[int], test.sets[i]...)
+			}
+
+			merge := MergeCustom(cmp.Compare[int], sets...)
+			if !slices.Equal(merge.items, test.expected) {
+				t.Errorf("Expected %v, got %v", test.expected, merge.items)
+			}
+		})
+	}
+}
+
+func TestCustomIntersectMulti(t *testing.T) {
+	cases := []struct {
+		sets     [][]int
+		expected []int
+	}{
+		{sets: [][]int{{1, 2, 3}, {}, nil, {5, 4, 2}}, expected: []int{}},
+		{sets: nil, expected: []int{}},
+		{sets: [][]int{}, expected: []int{}},
+		{sets: [][]int{{1, 2, 3}, {11, 1, 2, 4, 5, 6}, {1, 100}}, expected: []int{1}},
+		{sets: [][]int{{1, 2, 3}, {1, 2, 3, 4}}, expected: []int{1, 2, 3}},
+	}
+
+	for i, test := range cases {
+		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
+			sets := make([]*Custom[int], len(test.sets))
+			for i := range test.sets {
+				sets[i] = NewCustomFrom(cmp.Compare[int], test.sets[i]...)
+			}
+
+			inter := IntersectCustom(cmp.Compare[int], sets...)
+			if !slices.Equal(inter.items, test.expected) {
+				t.Errorf("Expected %v, got %v", test.expected, inter.items)
+			}
+		})
+	}
+}

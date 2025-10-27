@@ -1,6 +1,7 @@
 package smallset
 
 import (
+	"cmp"
 	"fmt"
 	"iter"
 	"slices"
@@ -292,6 +293,7 @@ func (s *Custom[T]) IsEqual(other *Custom[T]) bool {
 
 // Intersect returns the intersection of two sets, returning a NewCustom set
 // containing only the common elements. O(N+M) complexity.
+// s1 and s2 must use the same (or equivalent) comparison functions.
 func (s *Custom[T]) Intersect(other *Custom[T]) *Custom[T] {
 	size := min(s.Size(), other.Size())
 	if size == 0 {
@@ -305,12 +307,12 @@ func (s *Custom[T]) Intersect(other *Custom[T]) *Custom[T] {
 
 	for i < s.Size() && j < other.Size() {
 		s_i := s.items[i]
-		o_i := other.items[j]
+		o_j := other.items[j]
 
-		if s.cmp.less(s_i, o_i) {
+		if s.cmp.less(s_i, o_j) {
 			// element in s not in other
 			i++
-		} else if s.cmp.less(o_i, s_i) {
+		} else if s.cmp.less(o_j, s_i) {
 			// element in other not in s
 			j++
 		} else {
@@ -326,6 +328,7 @@ func (s *Custom[T]) Intersect(other *Custom[T]) *Custom[T] {
 
 // Difference returns the difference between this set and other. The returned set will contain
 // all elements of this set that are not elements of other. O(N+M) complexity.
+// s1 and s2 must use the same (or equivalent) comparison functions.
 func (s *Custom[T]) Difference(other *Custom[T]) *Custom[T] {
 	if s.IsEmpty() {
 		return NewCustom[T](s.cmp, defaultCapacity)
@@ -341,13 +344,13 @@ func (s *Custom[T]) Difference(other *Custom[T]) *Custom[T] {
 
 	for i < s.Size() && j < other.Size() {
 		s_i := s.items[i]
-		o_i := other.items[j]
+		o_j := other.items[j]
 
-		if s.cmp.less(s_i, o_i) {
+		if s.cmp.less(s_i, o_j) {
 			// element in s not in other
 			diff.items = append(diff.items, s_i)
 			i++
-		} else if s.cmp.less(o_i, s_i) {
+		} else if s.cmp.less(o_j, s_i) {
 			// element in other not in s
 			j++
 		} else {
@@ -363,6 +366,7 @@ func (s *Custom[T]) Difference(other *Custom[T]) *Custom[T] {
 
 // SymmetricDifference returns a NewCustom set with all elements which are
 // in either this set or the other set but not in both. O(N+M) complexity.
+// s1 and s2 must use the same (or equivalent) comparison functions.
 func (s *Custom[T]) SymmetricDifference(other *Custom[T]) *Custom[T] {
 	if s.IsEmpty() {
 		return other.Clone()
@@ -378,15 +382,15 @@ func (s *Custom[T]) SymmetricDifference(other *Custom[T]) *Custom[T] {
 
 	for i < s.Size() && j < other.Size() {
 		s_i := s.items[i]
-		o_i := other.items[j]
+		o_j := other.items[j]
 
-		if s.cmp.less(s_i, o_i) {
+		if s.cmp.less(s_i, o_j) {
 			// element in s not in other
 			sdiff.items = append(sdiff.items, s_i)
 			i++
-		} else if s.cmp.less(o_i, s_i) {
+		} else if s.cmp.less(o_j, s_i) {
 			// element in other not in s
-			sdiff.items = append(sdiff.items, o_i)
+			sdiff.items = append(sdiff.items, o_j)
 			j++
 		} else {
 			// element in both
@@ -401,6 +405,7 @@ func (s *Custom[T]) SymmetricDifference(other *Custom[T]) *Custom[T] {
 }
 
 // Union returns a NewCustom set with all elements in both sets. O(N+M) complexity.
+// s1 and s2 must use the same (or equivalent) comparison functions.
 func (s *Custom[T]) Union(other *Custom[T]) *Custom[T] {
 	if s.IsEmpty() {
 		return other.Clone()
@@ -416,15 +421,15 @@ func (s *Custom[T]) Union(other *Custom[T]) *Custom[T] {
 
 	for i < s.Size() && j < other.Size() {
 		s_i := s.items[i]
-		o_i := other.items[j]
+		o_j := other.items[j]
 
-		if s.cmp.less(s_i, o_i) {
+		if s.cmp.less(s_i, o_j) {
 			// element in s not in other
 			union.items = append(union.items, s_i)
 			i++
-		} else if s.cmp.less(o_i, s_i) {
+		} else if s.cmp.less(o_j, s_i) {
 			// element in other not in s
-			union.items = append(union.items, o_i)
+			union.items = append(union.items, o_j)
 			j++
 		} else {
 			// element in both
@@ -444,6 +449,8 @@ func (s *Custom[T]) Union(other *Custom[T]) *Custom[T] {
 // - inter: elements in both sets
 // - d21: elements in s2 not in s1
 // O(N+M) complexity.
+//
+// s1 and s2 must use the same (or equivalent) comparison functions.
 func (s1 *Custom[T]) Partition(s2 *Custom[T]) (d12, inter, d21 *Custom[T]) {
 	if s1.IsEmpty() {
 		return NewCustom[T](s1.cmp, defaultCapacity), NewCustom[T](s1.cmp, defaultCapacity), s2.Clone()
@@ -482,4 +489,106 @@ func (s1 *Custom[T]) Partition(s2 *Custom[T]) (d12, inter, d21 *Custom[T]) {
 	d12.items = append(d12.items, s1.items[i:]...)
 	d21.items = append(d21.items, s2.items[j:]...)
 	return d12, inter, d21
+}
+
+// MergeCustom efficiently combines multiple [Custom] sets into a single new set
+// with the specified comparison function cmp.
+// This is significantly more efficient than chaining s1.Union(s2).Union(s3)...
+// as it performs only a single sort and compact operation on the combined data.
+func MergeCustom[T any](compare func(a, b T) int, sets ...*Custom[T]) *Custom[T] {
+	if compare == nil {
+		panic("smallset.MergeCustom: cmp cannot be nil")
+	}
+	if len(sets) == 0 {
+		return NewCustom[T](compare, defaultCapacity)
+	}
+	if len(sets) == 1 {
+		return &Custom[T]{
+			items: slices.Clone(sets[0].items),
+			cmp:   compare,
+		}
+	}
+
+	size := 0
+	for _, s := range sets {
+		size += s.Size()
+	}
+
+	if size == 0 {
+		return NewCustom[T](compare, defaultCapacity)
+	}
+
+	cmp := compareFunc[T](compare)
+	combined := make([]T, 0, size)
+	for _, s := range sets {
+		combined = append(combined, s.items...)
+	}
+
+	slices.SortFunc(combined, compare)
+	combined = slices.CompactFunc(combined, cmp.equal)
+	return &Custom[T]{
+		items: combined,
+		cmp:   compare,
+	}
+}
+
+// IntersectCustom efficiently finds the common elements present in *all* provided [Custom] sets.
+// The 'cmp' function defines the ordering for the resulting set, and *must* be the same as the
+// comparison functions of all sets.
+// It works by iteratively intersecting sets from the smallest to the biggest.
+// It sorts the sets slice in place.
+func IntersectCustom[T any](compare func(a, b T) int, sets ...*Custom[T]) *Custom[T] {
+	if compare == nil {
+		panic("smallset.IntersectCustom: cmp cannot be nil")
+	}
+	if len(sets) == 0 {
+		return NewCustom[T](compare, defaultCapacity)
+	}
+	if len(sets) == 1 {
+		return sets[0].Clone()
+	}
+
+	// sort the sets from smallest to biggest
+	slices.SortFunc(sets, func(s1, s2 *Custom[T]) int {
+		return cmp.Compare(s1.Size(), s2.Size())
+	})
+
+	inter := sets[0].Clone()
+	if inter.IsEmpty() {
+		return inter
+	}
+
+	cmp := compareFunc[T](compare)
+	for _, set := range sets[1:] {
+		// w: write-index. Tracks the position to place the next "kept" item.
+		// r: read-index. Iterates through our 'candidates' slice.
+		// j: set-index. Iterates through the 'setItems' slice.
+		w, r, j := 0, 0, 0
+
+		for r < inter.Size() && j < set.Size() {
+			candidate := inter.items[r]
+			item := set.items[j]
+
+			if cmp.less(candidate, item) {
+				// element in inter not in set.
+				// Discard it by not increasing the write index
+				r++
+			} else if cmp.less(item, candidate) {
+				// element in set not in inter
+				j++
+			} else {
+				// element in both, keep it
+				inter.items[w] = candidate
+				w++
+				r++
+				j++
+			}
+		}
+
+		inter.items = inter.items[:w]
+		if inter.IsEmpty() {
+			return inter
+		}
+	}
+	return inter
 }
