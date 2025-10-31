@@ -38,10 +38,7 @@ func NewFrom[T cmp.Ordered](items ...T) *Ordered[T] {
 	copy := slices.Clone(items)
 	slices.Sort(copy)
 	copy = slices.Compact(copy)
-
-	s := New[T](max(len(copy), defaultCapacity))
-	s.items = copy
-	return s
+	return &Ordered[T]{items: copy}
 }
 
 // Size returns the number of elements in the set.

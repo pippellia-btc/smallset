@@ -75,10 +75,7 @@ func NewCustomFrom[T any](cmp func(a, b T) int, items ...T) *Custom[T] {
 	compare := compareFunc[T](cmp)
 	slices.SortFunc(copy, compare)
 	copy = slices.CompactFunc(copy, compare.equal)
-
-	s := NewCustom(compare, max(len(copy), defaultCapacity))
-	s.items = copy
-	return s
+	return &Custom[T]{cmp: compare, items: copy}
 }
 
 // Size returns the number of elements in the set.
