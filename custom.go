@@ -83,13 +83,23 @@ func (s *Custom[T]) Size() int {
 	return len(s.items)
 }
 
+// Capacity returns the capacity of the underlying slice.
+func (s *Custom[T]) Capacity() int {
+	return cap(s.items)
+}
+
 // IsEmpty returns whether the set has no elements.
 func (s *Custom[T]) IsEmpty() bool {
 	return len(s.items) == 0
 }
 
-// Clear removes all elements.
+// Clear removes all elements from the set.
+//
+// It zeroes out the elements to prevent memory leaks (releasing references)
+// and resets the length to 0. The underlying array capacity is preserved
+// to minimize allocations during future insertions.
 func (s *Custom[T]) Clear() {
+	clear(s.items)
 	s.items = s.items[:0]
 }
 
