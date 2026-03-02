@@ -53,7 +53,7 @@ func NewCustom[T any](cmp func(a, b T) int, capacity int) *Custom[T] {
 	}
 }
 
-// NewCustomFrom returns an initialized set that contains the provided elements,
+// CustomFrom returns an initialized set that contains the provided elements,
 // sorted by the provided compare function cmp.
 //
 // The cmp function allows two elements, a and b, to be compared,
@@ -63,12 +63,12 @@ func NewCustom[T any](cmp func(a, b T) int, capacity int) *Custom[T] {
 // - cmp(a, b) == 0 if a = b (duplicates)
 //
 // It panics if cmp is nil.
-func NewCustomFrom[T any](cmp func(a, b T) int, items ...T) *Custom[T] {
+func CustomFrom[T any](cmp func(a, b T) int, items ...T) *Custom[T] {
 	if len(items) == 0 {
 		return NewCustom(cmp, defaultCapacity)
 	}
 	if cmp == nil {
-		panic("smallset.NewCustomFrom: cmp cannot be nil")
+		panic("smallset.CustomFrom: cmp cannot be nil")
 	}
 
 	copy := slices.Clone(items)
@@ -245,7 +245,7 @@ func (s *Custom[T]) Descend() iter.Seq2[int, T] {
 	return slices.Backward(s.items)
 }
 
-// BetweenAsc iterates NewCustomFrom min (inclusive) to max (exclusive) in ascending order.
+// BetweenAsc iterates CustomFrom min (inclusive) to max (exclusive) in ascending order.
 // If min or max are not present in the set, iteration starts/ends at the position
 // where they would appear in the sorted slice. Panics if max < min.
 func (s *Custom[T]) BetweenAsc(min, max T) iter.Seq2[int, T] {
@@ -267,7 +267,7 @@ func (s *Custom[T]) BetweenAsc(min, max T) iter.Seq2[int, T] {
 	}
 }
 
-// BetweenDesc iterates NewCustomFrom max (inclusive) down to min (exclusive) in descending order.
+// BetweenDesc iterates CustomFrom max (inclusive) down to min (exclusive) in descending order.
 // If min or max are not present in the set, iteration starts/ends at the position
 // where they would appear in the sorted slice. Panics if max < min.
 func (s *Custom[T]) BetweenDesc(max, min T) iter.Seq2[int, T] {

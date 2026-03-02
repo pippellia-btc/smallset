@@ -60,7 +60,7 @@ var (
 )
 
 func TestCustomContains(t *testing.T) {
-	s := NewCustomFrom(PersonCmp, people1...)
+	s := CustomFrom(PersonCmp, people1...)
 
 	cases := []struct {
 		element  Person
@@ -142,7 +142,7 @@ func TestCustomRemove(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := NewCustomFrom(PersonCmp, test.initial...)
+			s := CustomFrom(PersonCmp, test.initial...)
 			res := make([]bool, len(test.toRemove))
 			for j, e := range test.toRemove {
 				res[j] = s.Remove(e)
@@ -181,7 +181,7 @@ func TestCustomRemoveBefore(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := NewCustomFrom(PersonCmp, test.initial...)
+			s := CustomFrom(PersonCmp, test.initial...)
 			res := s.RemoveBefore(test.max)
 
 			if res != test.expected {
@@ -218,7 +218,7 @@ func TestCustomRemoveFrom(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := NewCustomFrom(PersonCmp, test.initial...)
+			s := CustomFrom(PersonCmp, test.initial...)
 			res := s.RemoveFrom(test.min)
 
 			if res != test.expected {
@@ -255,7 +255,7 @@ func TestCustomRemoveBetween(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := NewCustomFrom(PersonCmp, test.initial...)
+			s := CustomFrom(PersonCmp, test.initial...)
 			res := s.RemoveBetween(test.min, test.max)
 
 			if res != test.expected {
@@ -270,9 +270,9 @@ func TestCustomRemoveBetween(t *testing.T) {
 }
 
 func TestCustomIsEqual(t *testing.T) {
-	s1 := NewCustomFrom(cmp.Compare[int], 1, 2, 3)
-	s2 := NewCustomFrom(cmp.Compare[int], 3, 2, 1)
-	s3 := NewCustomFrom(cmp.Compare[int], 1, 2, 3, 4)
+	s1 := CustomFrom(cmp.Compare[int], 1, 2, 3)
+	s2 := CustomFrom(cmp.Compare[int], 3, 2, 1)
+	s3 := CustomFrom(cmp.Compare[int], 1, 2, 3, 4)
 	s4 := NewCustom(cmp.Compare[int], 10)
 
 	cases := []struct {
@@ -300,9 +300,9 @@ func TestCustomMin(t *testing.T) {
 		set      *Custom[int]
 		expected int
 	}{
-		{set: NewCustomFrom(cmp.Compare[int], 10, 5, 20, 15), expected: 5},
-		{set: NewCustomFrom(cmp.Compare[int], 1, 5, 20, 69), expected: 1},
-		{set: NewCustomFrom(cmp.Compare[int], 7, 8, 4, 12, 221), expected: 4},
+		{set: CustomFrom(cmp.Compare[int], 10, 5, 20, 15), expected: 5},
+		{set: CustomFrom(cmp.Compare[int], 1, 5, 20, 69), expected: 1},
+		{set: CustomFrom(cmp.Compare[int], 7, 8, 4, 12, 221), expected: 4},
 	}
 
 	for i, test := range cases {
@@ -320,9 +320,9 @@ func TestCustomMax(t *testing.T) {
 		set      *Custom[int]
 		expected int
 	}{
-		{set: NewCustomFrom(cmp.Compare[int], 10, 5, 20, 15), expected: 20},
-		{set: NewCustomFrom(cmp.Compare[int], 1, 5, 20, 69), expected: 69},
-		{set: NewCustomFrom(cmp.Compare[int], 7, 8, 4, 12, 221), expected: 221},
+		{set: CustomFrom(cmp.Compare[int], 10, 5, 20, 15), expected: 20},
+		{set: CustomFrom(cmp.Compare[int], 1, 5, 20, 69), expected: 69},
+		{set: CustomFrom(cmp.Compare[int], 7, 8, 4, 12, 221), expected: 221},
 	}
 
 	for i, test := range cases {
@@ -341,9 +341,9 @@ func TestCustomMinK(t *testing.T) {
 		k        int
 		expected []int
 	}{
-		{set: NewCustomFrom(cmp.Compare[int], 10, 5, 20, 15), k: 2, expected: []int{5, 10}},
-		{set: NewCustomFrom(cmp.Compare[int], 7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
-		{set: NewCustomFrom(cmp.Compare[int], 1, 5, 20, 69), k: 0, expected: []int{}},
+		{set: CustomFrom(cmp.Compare[int], 10, 5, 20, 15), k: 2, expected: []int{5, 10}},
+		{set: CustomFrom(cmp.Compare[int], 7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
+		{set: CustomFrom(cmp.Compare[int], 1, 5, 20, 69), k: 0, expected: []int{}},
 		{set: NewCustom(cmp.Compare[int], 10), k: 5, expected: []int{}},
 		{set: NewCustom(cmp.Compare[int], 10), k: 0, expected: []int{}},
 	}
@@ -364,9 +364,9 @@ func TestCustomMaxK(t *testing.T) {
 		k        int
 		expected []int
 	}{
-		{set: NewCustomFrom(cmp.Compare[int], 10, 5, 20, 15), k: 2, expected: []int{15, 20}},
-		{set: NewCustomFrom(cmp.Compare[int], 7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
-		{set: NewCustomFrom(cmp.Compare[int], 1, 5, 20, 69), k: 0, expected: []int{}},
+		{set: CustomFrom(cmp.Compare[int], 10, 5, 20, 15), k: 2, expected: []int{15, 20}},
+		{set: CustomFrom(cmp.Compare[int], 7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
+		{set: CustomFrom(cmp.Compare[int], 1, 5, 20, 69), k: 0, expected: []int{}},
 		{set: NewCustom(cmp.Compare[int], 10), k: 5, expected: []int{}},
 		{set: NewCustom(cmp.Compare[int], 10), k: 0, expected: []int{}},
 	}
@@ -382,7 +382,7 @@ func TestCustomMaxK(t *testing.T) {
 }
 
 func TestCustomBetweenAsc(t *testing.T) {
-	s := NewCustomFrom(cmp.Compare[int], 1, 3, 5, 7, 9)
+	s := CustomFrom(cmp.Compare[int], 1, 3, 5, 7, 9)
 
 	cases := []struct {
 		min, max int
@@ -407,7 +407,7 @@ func TestCustomBetweenAsc(t *testing.T) {
 }
 
 func TestCustomBetweenDesc(t *testing.T) {
-	s := NewCustomFrom(cmp.Compare[int], 1, 3, 5, 7, 9)
+	s := CustomFrom(cmp.Compare[int], 1, 3, 5, 7, 9)
 
 	cases := []struct {
 		max, min int
@@ -447,8 +447,8 @@ func TestCustomIntersect(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewCustomFrom(cmp.Compare[int], test.s1...)
-			s2 := NewCustomFrom(cmp.Compare[int], test.s2...)
+			s1 := CustomFrom(cmp.Compare[int], test.s1...)
+			s2 := CustomFrom(cmp.Compare[int], test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -484,8 +484,8 @@ func TestCustomDifference(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewCustomFrom(cmp.Compare[int], test.s1...)
-			s2 := NewCustomFrom(cmp.Compare[int], test.s2...)
+			s1 := CustomFrom(cmp.Compare[int], test.s1...)
+			s2 := CustomFrom(cmp.Compare[int], test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -520,8 +520,8 @@ func TestCustomUnion(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewCustomFrom(cmp.Compare[int], test.s1...)
-			s2 := NewCustomFrom(cmp.Compare[int], test.s2...)
+			s1 := CustomFrom(cmp.Compare[int], test.s1...)
+			s2 := CustomFrom(cmp.Compare[int], test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -556,8 +556,8 @@ func TestCustomSymmetricDifference(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewCustomFrom(cmp.Compare[int], test.s1...)
-			s2 := NewCustomFrom(cmp.Compare[int], test.s2...)
+			s1 := CustomFrom(cmp.Compare[int], test.s1...)
+			s2 := CustomFrom(cmp.Compare[int], test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -610,8 +610,8 @@ func TestCustomPartition(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewCustomFrom(cmp.Compare[int], test.s1...)
-			s2 := NewCustomFrom(cmp.Compare[int], test.s2...)
+			s1 := CustomFrom(cmp.Compare[int], test.s1...)
+			s2 := CustomFrom(cmp.Compare[int], test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -654,7 +654,7 @@ func TestCustomMerge(t *testing.T) {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
 			sets := make([]*Custom[int], len(test.sets))
 			for i := range test.sets {
-				sets[i] = NewCustomFrom(cmp.Compare[int], test.sets[i]...)
+				sets[i] = CustomFrom(cmp.Compare[int], test.sets[i]...)
 			}
 
 			merge := MergeCustom(cmp.Compare[int], sets...)
@@ -681,7 +681,7 @@ func TestCustomIntersectMulti(t *testing.T) {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
 			sets := make([]*Custom[int], len(test.sets))
 			for i := range test.sets {
-				sets[i] = NewCustomFrom(cmp.Compare[int], test.sets[i]...)
+				sets[i] = CustomFrom(cmp.Compare[int], test.sets[i]...)
 			}
 
 			inter := IntersectCustom(cmp.Compare[int], sets...)

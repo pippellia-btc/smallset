@@ -29,8 +29,8 @@ func New[T cmp.Ordered](capacity int) *Ordered[T] {
 	}
 }
 
-// NewFrom returns an initialized set that contains the provided elements.
-func NewFrom[T cmp.Ordered](items ...T) *Ordered[T] {
+// From returns an initialized set that contains the provided elements.
+func From[T cmp.Ordered](items ...T) *Ordered[T] {
 	if len(items) == 0 {
 		return New[T](defaultCapacity)
 	}
@@ -207,7 +207,7 @@ func (s *Ordered[T]) Descend() iter.Seq2[int, T] {
 	return slices.Backward(s.items)
 }
 
-// BetweenAsc iterates NewFrom min (inclusive) to max (exclusive) in ascending order.
+// BetweenAsc iterates From min (inclusive) to max (exclusive) in ascending order.
 // If min or max are not present in the set, iteration starts/ends at the position
 // where they would appear in the sorted slice. Panics if max < min.
 func (s *Ordered[T]) BetweenAsc(min, max T) iter.Seq2[int, T] {
@@ -229,7 +229,7 @@ func (s *Ordered[T]) BetweenAsc(min, max T) iter.Seq2[int, T] {
 	}
 }
 
-// BetweenDesc iterates NewFrom max (inclusive) down to min (exclusive) in descending order.
+// BetweenDesc iterates From max (inclusive) down to min (exclusive) in descending order.
 // If min or max are not present in the set, iteration starts/ends at the position
 // where they would appear in the sorted slice. Panics if max < min.
 func (s *Ordered[T]) BetweenDesc(max, min T) iter.Seq2[int, T] {

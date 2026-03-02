@@ -13,7 +13,7 @@ import (
 
 func TestContains(t *testing.T) {
 	initial := []int{5, 10, 15, 20}
-	s := NewFrom(initial...)
+	s := From(initial...)
 
 	cases := []struct {
 		element  int
@@ -106,7 +106,7 @@ func TestRemove(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := NewFrom(test.initial...)
+			s := From(test.initial...)
 			res := make([]bool, len(test.toRemove))
 			for j, e := range test.toRemove {
 				res[j] = s.Remove(e)
@@ -152,7 +152,7 @@ func TestRemoveBefore(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := NewFrom(test.initial...)
+			s := From(test.initial...)
 			res := s.RemoveBefore(test.max)
 
 			if res != test.expected {
@@ -195,7 +195,7 @@ func TestRemoveFrom(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := NewFrom(test.initial...)
+			s := From(test.initial...)
 			res := s.RemoveFrom(test.min)
 
 			if res != test.expected {
@@ -238,7 +238,7 @@ func TestRemoveBetween(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s := NewFrom(test.initial...)
+			s := From(test.initial...)
 			res := s.RemoveBetween(test.min, test.max)
 
 			if res != test.expected {
@@ -253,9 +253,9 @@ func TestRemoveBetween(t *testing.T) {
 }
 
 func TestIsEqual(t *testing.T) {
-	s1 := NewFrom(1, 2, 3)
-	s2 := NewFrom(3, 2, 1)
-	s3 := NewFrom(1, 2, 3, 4)
+	s1 := From(1, 2, 3)
+	s2 := From(3, 2, 1)
+	s3 := From(1, 2, 3, 4)
 	s4 := New[int](10)
 
 	cases := []struct {
@@ -283,9 +283,9 @@ func TestMin(t *testing.T) {
 		set      *Ordered[int]
 		expected int
 	}{
-		{set: NewFrom(10, 5, 20, 15), expected: 5},
-		{set: NewFrom(1, 5, 20, 69), expected: 1},
-		{set: NewFrom(7, 8, 4, 12, 221), expected: 4},
+		{set: From(10, 5, 20, 15), expected: 5},
+		{set: From(1, 5, 20, 69), expected: 1},
+		{set: From(7, 8, 4, 12, 221), expected: 4},
 	}
 
 	for i, test := range cases {
@@ -303,9 +303,9 @@ func TestMax(t *testing.T) {
 		set      *Ordered[int]
 		expected int
 	}{
-		{set: NewFrom(10, 5, 20, 15), expected: 20},
-		{set: NewFrom(1, 5, 20, 69), expected: 69},
-		{set: NewFrom(7, 8, 4, 12, 221), expected: 221},
+		{set: From(10, 5, 20, 15), expected: 20},
+		{set: From(1, 5, 20, 69), expected: 69},
+		{set: From(7, 8, 4, 12, 221), expected: 221},
 	}
 
 	for i, test := range cases {
@@ -324,9 +324,9 @@ func TestMinK(t *testing.T) {
 		k        int
 		expected []int
 	}{
-		{set: NewFrom(10, 5, 20, 15), k: 2, expected: []int{5, 10}},
-		{set: NewFrom(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
-		{set: NewFrom(1, 5, 20, 69), k: 0, expected: []int{}},
+		{set: From(10, 5, 20, 15), k: 2, expected: []int{5, 10}},
+		{set: From(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
+		{set: From(1, 5, 20, 69), k: 0, expected: []int{}},
 		{set: New[int](10), k: 5, expected: []int{}},
 		{set: New[int](10), k: 0, expected: []int{}},
 	}
@@ -347,9 +347,9 @@ func TestMaxK(t *testing.T) {
 		k        int
 		expected []int
 	}{
-		{set: NewFrom(10, 5, 20, 15), k: 2, expected: []int{15, 20}},
-		{set: NewFrom(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
-		{set: NewFrom(1, 5, 20, 69), k: 0, expected: []int{}},
+		{set: From(10, 5, 20, 15), k: 2, expected: []int{15, 20}},
+		{set: From(7, 8, 4, 12, 221), k: 150, expected: []int{4, 7, 8, 12, 221}},
+		{set: From(1, 5, 20, 69), k: 0, expected: []int{}},
 		{set: New[int](10), k: 5, expected: []int{}},
 		{set: New[int](10), k: 0, expected: []int{}},
 	}
@@ -373,7 +373,7 @@ func collect[T any](seq iter.Seq2[int, T]) []T {
 }
 
 func TestBetweenAsc(t *testing.T) {
-	s := NewFrom(1, 3, 5, 7, 9)
+	s := From(1, 3, 5, 7, 9)
 
 	cases := []struct {
 		min, max int
@@ -398,7 +398,7 @@ func TestBetweenAsc(t *testing.T) {
 }
 
 func TestBetweenDesc(t *testing.T) {
-	s := NewFrom(1, 3, 5, 7, 9)
+	s := From(1, 3, 5, 7, 9)
 
 	cases := []struct {
 		max, min int
@@ -438,8 +438,8 @@ func TestIntersect(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewFrom(test.s1...)
-			s2 := NewFrom(test.s2...)
+			s1 := From(test.s1...)
+			s2 := From(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -475,8 +475,8 @@ func TestDifference(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewFrom(test.s1...)
-			s2 := NewFrom(test.s2...)
+			s1 := From(test.s1...)
+			s2 := From(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -511,8 +511,8 @@ func TestUnion(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewFrom(test.s1...)
-			s2 := NewFrom(test.s2...)
+			s1 := From(test.s1...)
+			s2 := From(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -547,8 +547,8 @@ func TestSymmetricDifference(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewFrom(test.s1...)
-			s2 := NewFrom(test.s2...)
+			s1 := From(test.s1...)
+			s2 := From(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -601,8 +601,8 @@ func TestPartition(t *testing.T) {
 
 	for i, test := range cases {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
-			s1 := NewFrom(test.s1...)
-			s2 := NewFrom(test.s2...)
+			s1 := From(test.s1...)
+			s2 := From(test.s2...)
 
 			o1 := s1.Clone()
 			o2 := s2.Clone()
@@ -645,7 +645,7 @@ func TestMerge(t *testing.T) {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
 			sets := make([]*Ordered[int], len(test.sets))
 			for i := range test.sets {
-				sets[i] = NewFrom(test.sets[i]...)
+				sets[i] = From(test.sets[i]...)
 			}
 
 			merge := Merge(sets...)
@@ -672,7 +672,7 @@ func TestIntersectMulti(t *testing.T) {
 		t.Run(fmt.Sprintf("Case_%d", i), func(t *testing.T) {
 			sets := make([]*Ordered[int], len(test.sets))
 			for i := range test.sets {
-				sets[i] = NewFrom(test.sets[i]...)
+				sets[i] = From(test.sets[i]...)
 			}
 
 			inter := Intersect(sets...)
@@ -835,11 +835,11 @@ func BenchmarkIntersect(b *testing.B) {
 				vals2[i] += 100000 // Ensure half are different
 			}
 
-			set1 := NewFrom(vals1...)
-			set2 := NewFrom(vals2...)
+			set1 := From(vals1...)
+			set2 := From(vals2...)
 
-			custom1 := NewCustomFrom(cmp.Compare[int], vals1...)
-			custom2 := NewCustomFrom(cmp.Compare[int], vals2...)
+			custom1 := CustomFrom(cmp.Compare[int], vals1...)
+			custom2 := CustomFrom(cmp.Compare[int], vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
@@ -878,11 +878,11 @@ func BenchmarkUnion(b *testing.B) {
 			vals1 := bench.vals[:bench.size/2]
 			vals2 := bench.vals[bench.size/2:]
 
-			set1 := NewFrom(vals1...)
-			set2 := NewFrom(vals2...)
+			set1 := From(vals1...)
+			set2 := From(vals2...)
 
-			custom1 := NewCustomFrom(cmp.Compare[int], vals1...)
-			custom2 := NewCustomFrom(cmp.Compare[int], vals2...)
+			custom1 := CustomFrom(cmp.Compare[int], vals1...)
+			custom2 := CustomFrom(cmp.Compare[int], vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
@@ -925,11 +925,11 @@ func BenchmarkDifference(b *testing.B) {
 				vals2[i] += 100000
 			}
 
-			set1 := NewFrom(vals1...)
-			set2 := NewFrom(vals2...)
+			set1 := From(vals1...)
+			set2 := From(vals2...)
 
-			custom1 := NewCustomFrom(cmp.Compare[int], vals1...)
-			custom2 := NewCustomFrom(cmp.Compare[int], vals2...)
+			custom1 := CustomFrom(cmp.Compare[int], vals1...)
+			custom2 := CustomFrom(cmp.Compare[int], vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
@@ -972,11 +972,11 @@ func BenchmarkSymmetricDifference(b *testing.B) {
 				vals2[i] += 100000
 			}
 
-			set1 := NewFrom(vals1...)
-			set2 := NewFrom(vals2...)
+			set1 := From(vals1...)
+			set2 := From(vals2...)
 
-			custom1 := NewCustomFrom(cmp.Compare[int], vals1...)
-			custom2 := NewCustomFrom(cmp.Compare[int], vals2...)
+			custom1 := CustomFrom(cmp.Compare[int], vals1...)
+			custom2 := CustomFrom(cmp.Compare[int], vals2...)
 
 			map1 := mapset.NewThreadUnsafeSet(vals1...)
 			map2 := mapset.NewThreadUnsafeSet(vals2...)
